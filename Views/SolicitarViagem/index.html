@@ -1,0 +1,173 @@
+<div class="form-horizontal">
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="page-header">
+                <h4 id="typography">Solicitação de Viagem</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-danger">
+        <div class="panel-heading">
+            <h3 class="panel-title">Motivo Reprovação</h3>
+        </div>
+        <div class="panel-body">
+            A sua solicitação foi reprovada pq eu quis assim.
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2" for="txtOrigem">Origem</label>
+        <div class="col-md-10">
+            <input class="form-control text-box single-line" id="txtOrigem" type="text" value="" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2" for="txtDestino">Destino</label>
+        <div class="col-md-10">
+            <input class="form-control text-box single-line" id="txtDestino" type="text" value="" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2" for="txtDataIda">Data Ida</label>
+        <div class="col-md-10">
+            <input class="form-control text-box single-line" id="txtDataIda" type="date" value="" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2" for="txtDataVolta">Data Volta</label>
+        <div class="col-md-10">
+            <input class="form-control text-box single-line" id="txtDataVolta" type="date" value="" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2" for="txtMotivo">Motivo</label>
+        <div class="col-md-10">
+            <select class="form-control" id="txtMotivo">
+                    <option selected="selected">Reunião</option>
+                    <option>Apresentação</option>
+                    <option>Workshop</option>
+                    <option>Evento</option>
+                    <option>Outro</option>
+                </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2" for="txtObservacoes">Observações</label>
+        <div class="col-md-10">
+            <textarea class="form-control" style="min-width: 500px; height: 100px;" rows="5" id="txtObservacoes"></textarea>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="page-header">
+                <h4 id="typography">Prestação de Contas</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-danger">
+        <div class="panel-heading">
+            <h3 class="panel-title">Motivo Reprovação</h3>
+        </div>
+        <div class="panel-body">
+            A sua solicitação foi reprovada pq eu quis assim.
+        </div>
+    </div>
+
+    <div class="col-lg-12" style="margin-bottom: 30px;">
+        <div class="col-lg-3">
+            <label class="control-label" for="txtCategoria">Categoria</label>
+            <select class="form-control" id="txtCategoria">
+                    <option selected="selected">Passagem</option>
+                    <option>Hospedagem</option>
+                    <option>Alimentação</option>
+                    <option>Transporte</option>
+                    <option>Outro</option>
+                </select>
+        </div>
+        <div class="col-lg-3">
+            <label class="control-label" for="txtQuantidade">Quantidade</label>
+            <input class="form-control" id="txtQuantidade" type="number" min="1" value="1">
+        </div>
+        <div class="col-lg-3">
+            <label class="control-label" for="txtValor">Valor</label>
+            <input class="form-control" id="txtValor" type="text" value="">
+        </div>
+
+        <div class="col-lg-1" style="line-height: 65px;">
+            <button class="btn btn-primary" title="Adicionar Conta">
+                <i class="fa fa-plus" aria-hidden="true"></i>
+                Adicionar Conta
+            </button>
+        </div>
+    </div>
+
+    <table class="table table-striped table-hover ">
+        <thead>
+            <tr>
+                <th>Categoria</th>
+                <th>Quantidade</th>
+                <th>Valor</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td colspan="2" style="text-align: right;">Valor Total:</td>
+                <td colspan="2" style="text-align: left;">
+                    2.500,23
+                </td>
+            </tr>
+        </tfoot>
+        <tbody>
+            <tr>
+                <td>Passagem</td>
+                <td>2</td>
+                <td>2.500,23</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" title="Remover">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <button class="btn btn-success" title="Enviar para Aprovação">
+                <i class="fa fa-check" aria-hidden="true"></i>
+                Enviar para Aprovação
+            </button>
+            <button class="btn btn-primary" title="Salvar">
+                <i class="fa fa-floppy-o" aria-hidden="true"></i>
+                Salvar
+            </button>
+            <button class="btn btn-danger" title="Remover">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+                Remover
+            </button>
+
+            <button class="btn btn-success" title="Aprovar">
+                <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                Aprovar
+            </button>
+
+            <button class="btn btn-danger" title="Reprovar">
+                <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+                Reprovar
+            </button>
+        </div>
+    </div>
+</div>
+<div>
+    <a href="{{menuColaborador}}" class="btn btn-default">Voltar</a>
+</div>

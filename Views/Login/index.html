@@ -1,0 +1,35 @@
+<div class="row">
+    <div class="col-lg-6 col-lg-offset-3">
+        <div class="well bs-component">
+            <div class="form-horizontal">
+                <fieldset>
+                    <legend>Entrar</legend>
+                    <div class="form-group">
+                        <label for="txtEmail" class="col-lg-2 control-label">E-mail</label>
+                        <div class="col-lg-10">
+                            <input type="text" class="form-control" id="txtEmail" placeholder="Email" ng-model="login.email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtSenha" class="col-lg-2 control-label">Senha</label>
+                        <div class="col-lg-10">
+                            <input type="password" class="form-control" id="txtSenha" placeholder="Senha" ng-model="login.senha">
+                            <div class="checkbox">
+                                <label>
+                        <input type="checkbox" ng-model="login.lembrar"> Lembrar de mim
+                      </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-10 col-lg-offset-2">
+                            <button type="button" class="btn btn-primary" ng-click="RealizarLogin(login)">Entrar</button>
+                            <button type="reset" class="btn btn-default">Limpar</button>                            
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div id="source-button" class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div>
+        </div>
+    </div>
+</div>

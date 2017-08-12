@@ -1,0 +1,109 @@
+<input class="btn btn-default" value="Novo" ng-click="NovoUsuario()" />
+
+<br/><br/>
+
+<table class="table table-striped table-hover ">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Data de Admisão</th>
+            <th>Cargo</th>
+            <th>Ação</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Carlos Drummond de Andrade</td>
+            <td>10/02/2000</td>
+            <td>Colaborador</td>
+            <td>
+                <button class="btn btn-primary btn-sm" title="Editar">
+                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                </button>
+                <button class="btn btn-danger btn-sm" title="Excluir">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>Barack Obama</td>
+            <td>23/10/2007</td>
+            <td>Gestor</td>
+            <td>
+                <button class="btn btn-primary btn-sm" title="Editar">
+                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                </button>
+                <button class="btn btn-danger btn-sm" title="Excluir">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>Silvio Santos</td>
+            <td>03/10/1999</td>
+            <td>Administrador</td>
+            <td>                
+                <button class="btn btn-primary btn-sm" title="Editar">
+                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                </button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+(O gestor só poderá ser removido se não houver setor vinculado a ele)
+(Caso só tenha 1 administrador o mesmo não poderá ser removido)
+
+<!-- MODAL ADICIONAR -->
+<div id="modalNovo" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Novo usuário</h4>
+            </div>
+            <div class="modal-body">
+
+                <table class="tabelaAdicionar col-lg-5 col-lg-offset-1">
+                    <tbody>
+                        <tr>
+                            <td class="col-lg-3">
+                                <label class="control-label" for="txtNome">Nome</label>
+                            </td>
+                            <td>
+                                <input class="form-control" id="txtNome" type="text" value="" ng-model="usuario.nome">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="col-lg-3">
+                                <label class="control-label" for="txtAdmissao">Data de Admisão</label>
+                            </td>
+                            <td>
+                                <input class="form-control" id="txtAdmissao" type="date" value="" ng-model="usuario.admissao">
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="col-lg-3">
+                                <label for="cmbCargo" class="control-label">Cargo</label>
+                            </td>
+                            <td>
+                                <select class="form-control" id="cmbCargo" ng-model="usuario.cargo">
+                                    <option>Colaborador</option>
+                                    <option>Gestor</option>
+                                    <option>Administrador</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html ng-app="scotchApp">
+
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projeto Integrador</title>
+    <link href="/Content/Bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="/Content/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="/Content/site.css" rel="stylesheet">
+
+
+</head>
+
+<body ng-controller="mainController">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Projeto Integrador</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="{{menuLogin}}">Login</a></li>
+                    <li><a href="{{menuGestor}}">Gestor</a></li>
+                    <li><a href="{{menuSetor}}">Setor</a></li>
+                    <li><a href="{{menuUsuario}}">Usuario</a></li>
+                    <li><a href="{{menuColaborador}}">Colaborador</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+
+        <div class="col-lg-12">
+            <div ng-view></div>
+        </div>
+
+    </div>
+
+    <footer>
+        <hr>
+        <p>Projeto Integrador</p>
+    </footer>
+
+    <script src="/Scripts/modernizr-2.6.2.js"></script>
+    <script src="/Scripts/jquery-3.2.1.min.js"></script>
+    <script src="/Scripts/bootstrap.js"></script>
+    <script src="/Scripts/respond.js"></script>
+    <script src="/Scripts/angular.min.js"></script>
+    <script src="/Scripts/angular-route.min.js"></script>
+    <script src="/Scripts/site.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,73 @@
+<input class="btn btn-default" value="Novo" ng-click="NovoSetor()" />
+
+<br/><br/>
+
+<table class="table table-striped table-hover ">
+    <thead>
+        <tr>
+            <th>Setor</th>
+            <th>Gestor</th>
+            <th>Colaboradores</th>
+            <th>Ação</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Desenvolvimento</td>
+            <td>Barack Obama</td>
+            <td>25</td>
+            <td>                
+                <button class="btn btn-primary btn-sm" title="Editar">
+                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                </button>
+                <button class="btn btn-danger btn-sm" title="Excluir">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                </button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+(O setor só poderá ser removido se não houver colaboradores vinculados a ele)
+
+<!-- MODAL ADICIONAR -->
+<div id="modalNovo" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Novo setor</h4>
+            </div>
+            <div class="modal-body">
+
+                <table class="tabelaAdicionar col-lg-5 col-lg-offset-1">
+                    <tbody>
+                        <tr>
+                            <td class="col-lg-3">
+                                <label class="control-label" for="txtNome">Setor</label>
+                            </td>
+                            <td>
+                                <input class="form-control" id="txtNome" type="text" value="" ng-model="setor.nome">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="col-lg-3">
+                                <label for="cmbGestor" class="control-label">Gestor</label>
+                            </td>
+                            <td>
+                                <select class="form-control" id="cmbGestor" ng-model="setor.cargo">
+                                    <option>Barack Obama</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
