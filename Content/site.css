@@ -3,43 +3,57 @@
     padding-bottom: 20px;
 }
 
+
 /* Set padding to keep content from hitting the edges */
+
 .body-content {
     padding-left: 15px;
     padding-right: 15px;
     padding-top: 30px;
 }
 
+
 /* Override the default bootstrap behavior where horizontal description lists 
    will truncate terms that are too long to fit in the left column 
 */
+
 .dl-horizontal dt {
     white-space: normal;
 }
 
+
 /* Set width on the form input elements since they're 100% wide by default */
+
 input,
 select,
 textarea {
     max-width: 280px;
 }
 
-.tabelaAdicionar
-{
+.tabelaAdicionar {
     width: 100%;
     max-width: 100%;
     margin-bottom: 23px;
 }
 
-.logo
-{    
+.logo {
     font-family: 'Anton', sans-serif;
     color: white!important;
     font-weight: 900;
     font-size: 35px;
     text-shadow: 2px 2px 9px rgb(66, 66, 66);
 }
-    .logo > img{
-        max-width: 60px; 
-        margin-top: -15px;
+
+.logo>img {
+    max-width: 60px;
+    margin-top: -15px;
+}
+
+@media (max-width:768px) {
+    
+    .navbar-nav>li>a {
+        text-align: center;
+        font-size: medium;
+        
     }
+}
