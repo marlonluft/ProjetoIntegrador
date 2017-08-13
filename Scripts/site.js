@@ -146,8 +146,3 @@ scotchApp.controller('errorController', function ($scope) {
 
 
 });
-
-// JS PURO
-$('.nav a').on('click', function(){
-    $('.navbar-toggle').click();
-});
