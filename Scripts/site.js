@@ -1,8 +1,7 @@
-var scotchApp = angular.module('projetoIntegrador', ['ngRoute']);
+var projetoIntegrador = angular.module('projetoIntegrador', ['ngRoute']);
 
 // ROTAS
-scotchApp.config(function ($routeProvider, $windowProvider, $locationProvider) 
-{
+projetoIntegrador.config(function ($routeProvider, $windowProvider, $locationProvider) {
     $routeProvider
         .when('/', {
             templateUrl: '../Views/Login/index.html',
@@ -42,7 +41,7 @@ scotchApp.config(function ($routeProvider, $windowProvider, $locationProvider)
 });
 
 // CONTROLLERs
-scotchApp.controller('mainController', function ($scope, $window) {
+projetoIntegrador.controller('mainController', function ($scope, $window) {
 
     $scope.menuLogin = "/";
     $scope.menuGestor = '/#!/gestor/';
@@ -53,7 +52,7 @@ scotchApp.controller('mainController', function ($scope, $window) {
 
 });
 
-scotchApp.controller('loginController', function ($scope, $window) {
+projetoIntegrador.controller('loginController', function ($scope, $window) {
 
     $scope.RealizarLogin = function (login) {
         //login.email
@@ -64,58 +63,65 @@ scotchApp.controller('loginController', function ($scope, $window) {
 
 });
 
-scotchApp.controller('colaboradorController', function ($scope) {
+projetoIntegrador.controller('colaboradorController', function ($scope) {
 
     $scope.prestacoesConta = [];
 
-    $scope.categorias = [
-        {text:'Passagem', value: 0},
-        {text:'Hospedagem', value: 1},
-        {text:'Alimentação', value: 2},
-        {text:'Transporte', value: 3},
-        {text:'Outro', value: 4}
+    $scope.categorias = [{
+            text: 'Passagem',
+            value: 0
+        },
+        {
+            text: 'Hospedagem',
+            value: 1
+        },
+        {
+            text: 'Alimentação',
+            value: 2
+        },
+        {
+            text: 'Transporte',
+            value: 3
+        },
+        {
+            text: 'Outro',
+            value: 4
+        }
     ];
 
-    $scope.removerItem = function(id)
-    {
+    $scope.removerItem = function (id) {
         $('#modalRemover').modal('show');
     }
 
     $scope.SolicitarViagem = function () {
-        
+
     }
 
-    $scope.adicionarPrestacaoConta = function (prestacao)
-    {
+    $scope.adicionarPrestacaoConta = function (prestacao) {
         var obj = angular.copy(prestacao);
         obj.id = $scope.prestacoesConta.length;
 
         $scope.prestacoesConta.push(obj);
     }
 
-    $scope.recupearDescricao = function(value)
-    {
+    $scope.recupearDescricao = function (value) {
         var obj = $scope.categorias[Object.keys($scope.categorias).find(x => $scope.categorias[x].value === value)];
         return obj.text;
     }
 
-    $scope.recuperarTotalPrestacao = function()
-    {
+    $scope.recuperarTotalPrestacao = function () {
         var total = 0;
 
-        $scope.prestacoesConta.forEach(function(element) {
+        $scope.prestacoesConta.forEach(function (element) {
             total = total + (parseInt(element.quantidade) * parseFloat(element.valor));
         }, this);
 
         return total.toFixed(2);
     }
 
-    $scope.removerPrestacao = function(id)
-    {
-        for(var i = $scope.prestacoesConta.length -1; i >= 0; i--)
-        {
-            if ($scope.prestacoesConta[i].id == id)
-            {
+    $scope.removerPrestacao = function (id) {
+        for (var i = $scope.prestacoesConta.length - 1; i >= 0; i--) {
+            if ($scope.prestacoesConta[i].id == id) {
                 $scope.prestacoesConta.splice(i, 1);
                 break;
             }
@@ -124,16 +130,15 @@ scotchApp.controller('colaboradorController', function ($scope) {
 
 });
 
-scotchApp.controller('gestorController', function ($scope) {
+projetoIntegrador.controller('gestorController', function ($scope) {
 
-    $scope.reprovarItem = function(id)
-    {
+    $scope.reprovarItem = function (id) {
         $('#modalReprovar').modal('show');
     }
 
 });
 
-scotchApp.controller('setorController', function ($scope) {
+projetoIntegrador.controller('setorController', function ($scope) {
 
     $scope.NovoSetor = function () {
         $('#modalNovo').modal('show');
@@ -145,21 +150,52 @@ scotchApp.controller('setorController', function ($scope) {
 
 });
 
-scotchApp.controller('usuarioController', function ($scope) {
+projetoIntegrador.controller('usuarioController', function ($scope) {
 
     $scope.NovoUsuario = function () {
         $('#modalNovo').modal('show');
     }
 
-    $scope.removerItem = function(id)
-    {
+    $scope.removerItem = function (id) {
         $('#modalRemover').modal('show');
     }
 
 });
 
-scotchApp.controller('errorController', function ($scope) {
+projetoIntegrador.controller('errorController', function ($scope) {
 
 
 
 });
+
+/* DIRETIVAS */
+(function () {
+
+    projetoIntegrador.directive('ifLoading', ifLoading);
+    ifLoading.$injector = ['$http'];
+
+    function ifLoading($http) {
+
+        return {
+            restrict: 'A',
+            link: function (scope, elem) {
+                scope.isLoading = isLoading;
+
+                scope.$watch(scope.isLoading, toggleElement);
+
+                function toggleElement(loading) {
+
+                    if (loading) {
+                        elem[0].style.display = "block";
+                    } else {
+                        elem[0].style.display = "none";
+                    }
+                }
+
+                function isLoading() {
+                    return $http.pendingRequests.length > 0;
+                }
+            }
+        }
+    };
+})();
