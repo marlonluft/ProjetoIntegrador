@@ -93,6 +93,14 @@ projetoIntegrador.controller('colaboradorController', function ($scope) {
         $('#modalRemover').modal('show');
     }
 
+    $scope.reprovarItem = function (id) {
+        $('#modalReprovar').modal('show');
+    }
+
+    $scope.enviarAprovacao = function (id) {
+        $('#modalEnviarAprovacao').modal('show');
+    }    
+
     $scope.SolicitarViagem = function () {
 
     }
