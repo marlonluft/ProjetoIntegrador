@@ -99,7 +99,7 @@
         </div>
 
         <div class="col-lg-1" style="line-height: 65px;">
-            <button class="btn btn-primary" title="Adicionar Conta" ng-click="adicionarPrestacaoConta(conta)">
+            <button class="btn btn-primary" data-toggle="tooltip" title="Adicionar Conta" ng-click="adicionarPrestacaoConta(conta)">
                 <i class="fa fa-plus" aria-hidden="true"></i>
                 Adicionar Conta
             </button>
@@ -133,7 +133,7 @@
                     <td ng-bind="conta.quantidade"></td>
                     <td ng-bind="conta.valor"></td>
                     <td>
-                        <button class="btn btn-danger btn-sm" title="Remover">
+                        <button class="btn btn-danger btn-sm" data-toggle="tooltip" title="Remover">
                         <i class="fa fa-trash" aria-hidden="true" ng-click="removerPrestacao(conta.id)"></i>
                     </button>
                     </td>
@@ -144,25 +144,25 @@
 
     <div class="form-group">
         <div class="col-md-offset-2 col-md-10">
-            <button class="btn btn-success" title="Enviar para Aprovação" ng-click="enviarAprovacao(0)">
+            <button class="btn btn-success" data-toggle="tooltip" title="Enviar para Aprovação" ng-click="enviarAprovacao(0)">
                 <i class="fa fa-check" aria-hidden="true"></i>
                 Enviar para Aprovação
             </button>
-            <button class="btn btn-primary" title="Salvar">
+            <button class="btn btn-primary" data-toggle="tooltip" title="Salvar">
                 <i class="fa fa-floppy-o" aria-hidden="true"></i>
                 Salvar
             </button>
-            <button class="btn btn-danger" title="Remover" ng-click="removerItem(0)">
+            <button class="btn btn-danger" data-toggle="tooltip" title="Remover" ng-click="removerItem(0)">
                 <i class="fa fa-trash" aria-hidden="true"></i>
                 Remover
             </button>
 
-            <button class="btn btn-success" title="Aprovar">
+            <button class="btn btn-success" data-toggle="tooltip" title="Aprovar">
                 <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
                 Aprovar
             </button>
 
-            <button class="btn btn-danger" title="Reprovar" ng-click="reprovarItem(0)">
+            <button class="btn btn-danger" data-toggle="tooltip" title="Reprovar" ng-click="reprovarItem(0)">
                 <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
                 Reprovar
             </button>
