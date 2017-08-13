@@ -36,7 +36,7 @@ scotchApp.config(function ($routeProvider, $windowProvider, $locationProvider)
             redirectTo: '/naoEncontrado'
         });
 
-    $locationProvider.html5Mode(true);
+    //$locationProvider.html5Mode(true);
 
     var $window = $windowProvider.$get();
 });
@@ -45,11 +45,11 @@ scotchApp.config(function ($routeProvider, $windowProvider, $locationProvider)
 scotchApp.controller('mainController', function ($scope, $window) {
 
     $scope.menuLogin = "/";
-    $scope.menuGestor = '/gestor/';
-    $scope.menuSetor = '/setor/';
-    $scope.menuUsuario = '/usuario/';
-    $scope.menuColaborador = '/colaborador/';
-    $scope.menuSolicitarViagem = '/solicitarViagem/';
+    $scope.menuGestor = '/#!/gestor/';
+    $scope.menuSetor = '/#!/setor/';
+    $scope.menuUsuario = '/#!/usuario/';
+    $scope.menuColaborador = '/#!/colaborador/';
+    $scope.menuSolicitarViagem = '/#!/solicitarViagem/';
 
 });
 
