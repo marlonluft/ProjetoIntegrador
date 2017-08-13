@@ -30,3 +30,16 @@ textarea {
     max-width: 100%;
     margin-bottom: 23px;
 }
+
+.logo
+{    
+    font-family: 'Anton', sans-serif;
+    color: white!important;
+    font-weight: 900;
+    font-size: 35px;
+    text-shadow: 2px 2px 9px rgb(66, 66, 66);
+}
+    .logo > img{
+        max-width: 60px; 
+        margin-top: -15px;
+    }
