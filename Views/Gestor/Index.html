@@ -30,7 +30,7 @@
                             <button class="btn btn-success btn-sm" title="Aprovar">
                             <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
                         </button>
-                            <button class="btn btn-danger btn-sm" title="Reprovar">
+                            <button class="btn btn-danger btn-sm" title="Reprovar" ng-click="reprovarItem(0)">
                             <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
                         </button>
                             <button class="btn btn-default btn-sm" title="Visualizar">
@@ -60,7 +60,7 @@
                             <button class="btn btn-success btn-sm" title="Aprovar">
                             <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
                         </button>
-                            <button class="btn btn-danger btn-sm" title="Reprovar">
+                            <button class="btn btn-danger btn-sm" title="Reprovar" ng-click="reprovarItem(0)">
                             <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
                         </button>
                             <button class="btn btn-default btn-sm" title="Visualizar">
@@ -72,5 +72,29 @@
             </table>
         </div>
 
+    </div>
+</div>
+
+<!-- MODAL REPROVAR -->
+<div id="modalReprovar" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Reprovar</h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="form-group">
+                    <label class="control-label" for="txtMotivo">Digite o motivo da reprovação:</label>
+                    <textarea class="form-control" style="min-width: 100%; height: 100px;" rows="5" id="txtMotivo"></textarea>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger">Reprovar</button>
+            </div>
+        </div>
     </div>
 </div>

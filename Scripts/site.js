@@ -1,4 +1,4 @@
-var scotchApp = angular.module('scotchApp', ['ngRoute']);
+var scotchApp = angular.module('projetoIntegrador', ['ngRoute']);
 
 // ROTAS
 scotchApp.config(function ($routeProvider, $windowProvider, $locationProvider) 
@@ -76,8 +76,13 @@ scotchApp.controller('colaboradorController', function ($scope) {
         {text:'Outro', value: 4}
     ];
 
+    $scope.removerItem = function(id)
+    {
+        $('#modalRemover').modal('show');
+    }
+
     $scope.SolicitarViagem = function () {
-        $('#myModal').modal('show');
+        
     }
 
     $scope.adicionarPrestacaoConta = function (prestacao)
@@ -121,7 +126,10 @@ scotchApp.controller('colaboradorController', function ($scope) {
 
 scotchApp.controller('gestorController', function ($scope) {
 
-
+    $scope.reprovarItem = function(id)
+    {
+        $('#modalReprovar').modal('show');
+    }
 
 });
 
@@ -131,12 +139,21 @@ scotchApp.controller('setorController', function ($scope) {
         $('#modalNovo').modal('show');
     }
 
+    $scope.RemoverSetor = function (id) {
+        $('#modalRemover').modal('show');
+    }
+
 });
 
 scotchApp.controller('usuarioController', function ($scope) {
 
     $scope.NovoUsuario = function () {
         $('#modalNovo').modal('show');
+    }
+
+    $scope.removerItem = function(id)
+    {
+        $('#modalRemover').modal('show');
     }
 
 });

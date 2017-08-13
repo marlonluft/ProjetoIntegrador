@@ -21,7 +21,7 @@
                     <button class="btn btn-primary btn-sm" title="Editar">
                     <i class="fa fa-pencil" aria-hidden="true"></i>
                 </button>
-                    <button class="btn btn-danger btn-sm" title="Excluir">
+                    <button class="btn btn-danger btn-sm" title="Excluir" ng-click="removerItem(0)">
                     <i class="fa fa-trash" aria-hidden="true"></i>
                 </button>
                 </td>
@@ -34,7 +34,7 @@
                     <button class="btn btn-primary btn-sm" title="Editar">
                     <i class="fa fa-pencil" aria-hidden="true"></i>
                 </button>
-                    <button class="btn btn-danger btn-sm" title="Excluir">
+                    <button class="btn btn-danger btn-sm" title="Excluir" ng-click="removerItem(0)">
                     <i class="fa fa-trash" aria-hidden="true"></i>
                 </button>
                 </td>
@@ -123,6 +123,27 @@ removido)
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-primary">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL REMOVER -->
+<div id="modalRemover" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Remover usuário</h4>
+            </div>
+            <div class="modal-body">
+
+                Você tem certeza que deseja remover o usuário ""? Esta ação não poderá ser desfeita.
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger">Remover</button>
             </div>
         </div>
     </div>
