@@ -112,6 +112,7 @@ scotchApp.controller('colaboradorController', function ($scope) {
             if ($scope.prestacoesConta[i].id == id)
             {
                 $scope.prestacoesConta.splice(i, 1);
+                break;
             }
         }
     }
