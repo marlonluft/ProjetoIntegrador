@@ -146,3 +146,12 @@ scotchApp.controller('errorController', function ($scope) {
 
 
 });
+
+// JS PURO
+$(function(){ 
+    // Fechar o menu(celular) quando clicar em um item.
+    var navMain = $(".navbar-collapse");
+    navMain.on("click", "a:not([data-toggle])", null, function () {
+        navMain.collapse('hide');
+    });
+});
