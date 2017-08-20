@@ -1,5 +1,5 @@
 <div class="form-horizontal">
-
+{{objViagem}}
     <div class="row">
         <div class="col-lg-12">
             <div class="page-header">
@@ -8,47 +8,45 @@
         </div>
     </div>
 
-    <div class="panel panel-danger">
+    <div class="panel panel-danger" ng-if="objViagem.justificativa.length > 0 && objViagem.status == 2">
         <div class="panel-heading">
             <h3 class="panel-title">Motivo Reprovação</h3>
         </div>
-        <div class="panel-body">
-            A sua solicitação foi reprovada pq eu quis assim.
-        </div>
+        <div class="panel-body" ng-bind="objViagem.justificativa"></div>
     </div>
 
     <div class="form-group">
         <label class="control-label col-md-2" for="txtOrigem">Origem</label>
         <div class="col-md-10">
-            <input class="form-control text-box single-line" id="txtOrigem" type="text" value="" />
+            <input class="form-control text-box single-line" id="txtOrigem" type="text" ng-model="objViagem.origem" ng-bind="objViagem.origem" />
         </div>
     </div>
 
     <div class="form-group">
         <label class="control-label col-md-2" for="txtDestino">Destino</label>
         <div class="col-md-10">
-            <input class="form-control text-box single-line" id="txtDestino" type="text" value="" />
+            <input class="form-control text-box single-line" id="txtDestino" type="text" ng-model="objViagem.destino" />
         </div>
     </div>
 
     <div class="form-group">
         <label class="control-label col-md-2" for="txtDataIda">Data Ida</label>
         <div class="col-md-10">
-            <input class="form-control text-box single-line" id="txtDataIda" type="date" value="" />
+            <input class="form-control text-box single-line" id="txtDataIda" type="date" ng-model="objViagem.dataIda" />
         </div>
     </div>
 
     <div class="form-group">
         <label class="control-label col-md-2" for="txtDataVolta">Data Volta</label>
         <div class="col-md-10">
-            <input class="form-control text-box single-line" id="txtDataVolta" type="date" value="" />
+            <input class="form-control text-box single-line" id="txtDataVolta" type="date" ng-model="objViagem.dataVolta" />
         </div>
     </div>
 
     <div class="form-group">
         <label class="control-label col-md-2" for="txtMotivo">Motivo</label>
         <div class="col-md-10">
-            <select class="form-control" id="txtMotivo">
+            <select class="form-control" id="txtMotivo" ng-model="objViagem.motivo">
                     <option selected="selected">Reunião</option>
                     <option>Apresentação</option>
                     <option>Workshop</option>
@@ -61,7 +59,7 @@
     <div class="form-group">
         <label class="control-label col-md-2" for="txtObservacoes">Observações</label>
         <div class="col-md-10">
-            <textarea class="form-control" style="width: 500px; height: 100px;" rows="5" id="txtObservacoes"></textarea>
+            <textarea class="form-control" style="width: 500px; height: 100px;" rows="5" id="txtObservacoes" ng-model="objViagem.observacao"></textarea>
         </div>
     </div>
 
@@ -73,16 +71,14 @@
         </div>
     </div>
 
-    <div class="panel panel-danger">
+    <div class="panel panel-danger" ng-if="objViagem.justificativa.length > 0 && objViagem.status == 5">
         <div class="panel-heading">
             <h3 class="panel-title">Motivo Reprovação</h3>
         </div>
-        <div class="panel-body">
-            A sua solicitação foi reprovada pq eu quis assim.
-        </div>
+        <div class="panel-body" ng-bind="objViagem.justificativa"></div>
     </div>
 
-    <div class="col-lg-12" style="margin-bottom: 30px;">
+    <div class="col-lg-12" style="margin-bottom: 30px;" ng-if="!visualizarCustos">
         <div class="col-lg-3">
             <label class="control-label" for="txtCategoria">Categoria</label>
             <select class="form-control" id="txtCategoria" ng-model="conta.categoria">
@@ -133,9 +129,9 @@
                     <td ng-bind="conta.quantidade"></td>
                     <td ng-bind="conta.valor"></td>
                     <td>
-                        <button class="btn btn-danger btn-sm" data-toggle="tooltip" title="Remover">
-                        <i class="fa fa-trash" aria-hidden="true" ng-click="removerPrestacao(conta.id)"></i>
-                    </button>
+                        <button class="btn btn-danger btn-sm" data-toggle="tooltip" title="Remover" ng-if="!visualizarCustos">
+                            <i class="fa fa-trash" aria-hidden="true" ng-click="removerPrestacao(conta.id)"></i>
+                        </button>
                     </td>
                 </tr>
             </tbody>

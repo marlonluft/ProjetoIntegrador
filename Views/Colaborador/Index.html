@@ -23,86 +23,31 @@
                         <th>Ação</th>
                     </tr>
                 </thead>
+                <tfoot>
+                    <tr ng-show="(solicitacoesViagem | filter:{status: '!3'}).length == 0">
+                        <td colspan="7" style="text-align: center;">
+                            Nenhuma solicitação de viagem cadastrada.
+                        </td>
+                    </tr>
+                </tfoot>
                 <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Blumenau - BR</td>
-                        <td>New York - USA</td>
-                        <td>11/10/2017</td>
-                        <td>25/11/2017</td>
-                        <td>Em Aberto</td>
+                    <tr ng-repeat="item in solicitacoesViagem | filter:{status: '!3'}">
+                        <td ng-bind="item.id"></td>
+                        <td ng-bind="item.origem"></td>
+                        <td ng-bind="item.destino"></td>
+                        <td ng-bind="item.dataIda"></td>
+                        <td ng-bind="item.dataVolta"></td>
+                        <td ng-bind="recupearDescricaoStatus(item.status)"></td>
                         <td>
-                        <button class="btn btn-primary btn-sm" data-toggle="tooltip" title="Editar">
-                            <i class="fa fa-pencil" aria-hidden="true"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm" data-toggle="tooltip" title="Excluir" ng-click="removerItem(0)">
-                            <i class="fa fa-trash" aria-hidden="true"></i>
-                        </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Gaspar - BR</td>
-                        <td>São Paulo - BR</td>
-                        <td>08/12/2017</td>
-                        <td>20/01/2018</td>
-                        <td>Aguardando Aprovação de Viagem</td>
-                        <td>
-                            <button class="btn btn-default btn-sm" data-toggle="tooltip" title="Visualizar">
-                            <i class="fa fa-eye" aria-hidden="true"></i>
-                        </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>Gaspar - BR</td>
-                        <td>São Paulo - BR</td>
-                        <td>08/12/2017</td>
-                        <td>20/01/2018</td>
-                        <td>Solicitação Recusada</td>
-                        <td>
-                            <button class="btn btn-default btn-sm" data-toggle="tooltip" title="Visualizar">
-                            <i class="fa fa-eye" aria-hidden="true"></i>
-                        </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>Gaspar - BR</td>
-                        <td>São Paulo - BR</td>
-                        <td>08/12/2017</td>
-                        <td>20/01/2018</td>
-                        <td>Prestação Recusada</td>
-                        <td>
-                            <button class="btn btn-default btn-sm" data-toggle="tooltip" title="Visualizar">
-                            <i class="fa fa-eye" aria-hidden="true"></i>
-                        </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>5</td>
-                        <td>Gaspar - BR</td>
-                        <td>São Paulo - BR</td>
-                        <td>08/12/2017</td>
-                        <td>20/01/2018</td>
-                        <td>Finalizado</td>
-                        <td>
-                            <button class="btn btn-default btn-sm" data-toggle="tooltip" title="Visualizar">
-                            <i class="fa fa-eye" aria-hidden="true"></i>
-                        </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>7</td>
-                        <td>Blumenau - BR</td>
-                        <td>Tocantins - BR</td>
-                        <td>11/10/2017</td>
-                        <td>25/11/2017</td>
-                        <td>Aguardando Aprovação de Contas</td>
-                        <td>
-                            <button class="btn btn-default btn-sm" data-toggle="tooltip" title="Visualizar">
-                            <i class="fa fa-eye" aria-hidden="true"></i>
-                        </button>
+                            <button ng-if="item.status == 0" class="btn btn-primary btn-sm" data-toggle="tooltip" title="Editar" ng-click="abrirSolicitacao(item.id)">
+                                <i class="fa fa-pencil" aria-hidden="true"></i>
+                            </button>
+                            <button ng-if="item.status == 0" class="btn btn-danger btn-sm" data-toggle="tooltip" title="Excluir" ng-click="removerItem(item.id)">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                            </button>
+                            <button ng-if="item.status != 0" class="btn btn-default btn-sm" data-toggle="tooltip" title="Visualizar" ng-click="abrirSolicitacao(item.id)">
+                                <i class="fa fa-eye" aria-hidden="true"></i>
+                            </button>
                         </td>
                     </tr>
                 </tbody>
@@ -124,17 +69,24 @@
                         <th>Ação</th>
                     </tr>
                 </thead>
+                <tfoot>
+                    <tr ng-show="(solicitacoesViagem | filter:{status:3}).length == 0">
+                        <td colspan="6" style="text-align: center;">
+                            Nenhuma solicitação de viagem aguardando prestação de contas.
+                        </td>
+                    </tr>
+                </tfoot>
                 <tbody>
-                    <tr>
-                        <td>6</td>
-                        <td>Blumenau - BR</td>
-                        <td>Acre - BR</td>
-                        <td>11/10/2017</td>
-                        <td>25/11/2017</td>
+                    <tr ng-repeat="item in solicitacoesViagem | filter:{status:3}">
+                        <td ng-bind="item.id"></td>
+                        <td ng-bind="item.origem"></td>
+                        <td ng-bind="item.destino"></td>
+                        <td ng-bind="item.dataIda"></td>
+                        <td ng-bind="item.dataVolta"></td>
                         <td>
-                            <button class="btn btn-primary btn-sm" data-toggle="tooltip" title="Prestar Conta">
-                            <i class="fa fa-gavel" aria-hidden="true"></i>
-                        </button>
+                            <button class="btn btn-primary btn-sm" data-toggle="tooltip" title="Prestar Conta" ng-click="abrirSolicitacao(item.id)">
+                                <i class="fa fa-gavel" aria-hidden="true"></i>
+                            </button>
                         </td>
                     </tr>
                 </tbody>
