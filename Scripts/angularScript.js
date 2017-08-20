@@ -64,12 +64,14 @@ projetoIntegrador.controller('mainController', function ($scope, $window) {
         if (typeof usuario == 'undefined') {
             $scope.usuarioLogado = {
                 Id: -1,
-                Cargo: ''
+                Cargo: '',
+                Logado: false
             }
         } else {
             $scope.usuarioLogado = {
                 Id: typeof usuario.Id != 'undefined' ? usuario.Id : -1,
-                Cargo: typeof usuario.Cargo != 'undefined' ? usuario.Cargo : ''
+                Cargo: typeof usuario.Cargo != 'undefined' ? usuario.Cargo : '',
+                Logado: true
             }
         }
 
@@ -202,7 +204,7 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
 
     // Verifica se tem um objeto de login salvo e realiza o login.
     // Caso contenha o parametro sair, somente matem os dados em tela mas não realiza o login.
-    if ($scope.login.email != '' && typeof $routeParams.sair == 'undefined') {
+    if ($scope.login.email != '' && typeof $routeParams.sair == 'undefined' && $scope.usuarioLogado.Logado) {
         $scope.RealizarLogin($scope.login, null);
     }
     else if ($routeParams.sair != 'undefined')
