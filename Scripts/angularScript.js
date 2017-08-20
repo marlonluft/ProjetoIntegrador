@@ -119,21 +119,23 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                                 window.localStorage.removeItem('senha');
                             }
 
-                            switch (data.perfil) {
+                            console.log(data.Id);
+
+                            switch (data.Cargo) {
 
                                 // Colaborador
-                                case 0:
+                                case 'COLABORADOR':
                                     $window.location.href = $scope.menuColaborador;
                                     break;
 
                                     // Gestor
-                                case 1:
+                                case 'GESTOR':
                                     $window.location.href = $scope.menuGestor;
                                     break;
 
                                     // Admin
                                 default:
-                                case 2:
+                                case 'ADMINISTRADOR':
                                     $window.location.href = $scope.menuUsuario;
                                     break;
                             }
