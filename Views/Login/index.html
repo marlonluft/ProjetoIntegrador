@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-lg-6 col-lg-offset-3">
         <div class="well bs-component">
-            <form action="#" class="form-horizontal">
+            <form action="#" class="form-horizontal" ng-keypress="RealizarLogin(login, $event)">
                 <fieldset>
                     <legend>Entrar</legend>
                     <div class="form-group">
@@ -24,7 +24,7 @@
                     <div class="form-group">
                         <div class="col-lg-10 col-lg-offset-2">
                             <button type="button" class="btn btn-primary" ng-click="RealizarLogin(login)">Entrar</button>
-                            <button type="reset" class="btn btn-default">Limpar</button>                            
+                            <button type="button" class="btn btn-default" ng-click="LimparLogin()">Limpar</button>                            
                         </div>
                     </div>
                 </fieldset>

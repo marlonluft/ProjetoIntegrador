@@ -1,21 +1,21 @@
 var caminhoApi = "http://104.41.50.175:8080/ProjetoIntegradorAPI/rest";
 
-var projetoIntegrador = angular.module('projetoIntegrador', ['ngRoute','ngAnimate', 'toastr']);
+var projetoIntegrador = angular.module('projetoIntegrador', ['ngRoute', 'ngAnimate', 'toastr']);
 
 // Toastr config
-projetoIntegrador.config(function(toastrConfig) {
+projetoIntegrador.config(function (toastrConfig) {
     angular.extend(toastrConfig, {
-      autoDismiss: false,
-      maxOpened: 0,
-      newestOnTop: true,
-      positionClass: 'toast-bottom-right',
-      preventDuplicates: false,
-      preventOpenDuplicates: true,
-      target: 'body',
-      progressBar: true,
-      timeOut: 3500
+        autoDismiss: false,
+        maxOpened: 0,
+        newestOnTop: true,
+        positionClass: 'toast-bottom-right',
+        preventDuplicates: false,
+        preventOpenDuplicates: true,
+        target: 'body',
+        progressBar: true,
+        timeOut: 3500
     });
-  });
+});
 
 // ROTAS
 projetoIntegrador.config(function ($routeProvider, $windowProvider, $locationProvider) {
@@ -66,70 +66,120 @@ projetoIntegrador.controller('mainController', function ($scope, $window) {
     $scope.menuUsuario = '/#!/usuario/';
     $scope.menuColaborador = '/#!/colaborador/';
     $scope.menuSolicitarViagem = '/#!/solicitarViagem/';
+    $scope.menuSair = "/#!/?sair";
 
 });
 
-projetoIntegrador.controller('loginController', function ($scope, $window, toastr) {
+projetoIntegrador.controller('loginController', function ($scope, $window, $routeParams, toastr) {
 
-    $scope.RealizarLogin = function (login) {
-        //login.email
-        //login.senha
-        //login.lembrar
+    $scope.LimparLogin = function () {
 
-        if (ValidarLogin(login))
-        {
-            var model = {
-                Email: login.email, 
-                Senha: login.senha
-            };
+        // Valida login salvo com a opção 'lembrar selecionada'.
+        var email = window.localStorage.getItem('email');
+        var senha = window.localStorage.getItem('senha');
 
-            $.ajax({
-                url: caminhoApi + '/usuario/logar',
-                type: 'post',
-                dataType: 'json',
-                contentType: "application/json; charset=utf-8",
-                data:  JSON.stringify(model)
-            })
-            .done(function (data) 
-            {
-                if (data.Sucesso)
-                {
-                    toastr.success('Login efetuado', 'Sucesso!');
-                }
-                else
-                {
-                    toastr.error(data.Mensagem);
-                }
-            })
-            .fail(function () 
-            {
-                toastr.error('Falha ao realizar a ação, tente novamente.');
-            });
+        if (email != null && typeof email != 'undefined') {
+            $scope.login = {
+                email: email,
+                senha: senha,
+                lembrar: true
+            }
+        } else {
+            $scope.login = {
+                email: '',
+                senha: '',
+                lembrar: false
+            }
         }
-
     }
 
-    function ValidarLogin(login)
-    {
-        if (typeof login == 'undefined' || login == null)
-        {
+    $scope.RealizarLogin = function (login, e) {
+        if (event.which == 13 || e == null) {
+            if (ValidarLogin(login)) {
+                var model = {
+                    Email: login.email,
+                    Senha: login.senha
+                };
+
+                $.ajax({
+                        url: caminhoApi + '/usuario/logar',
+                        type: 'post',
+                        dataType: 'json',
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify(model)
+                    })
+                    .done(function (data) {
+                        if (data.Sucesso) {
+
+                            if (login.lembrar) {
+                                window.localStorage.setItem('email', login.email);
+                                window.localStorage.setItem('senha', login.senha);
+                            } else {
+                                window.localStorage.removeItem('email');
+                                window.localStorage.removeItem('senha');
+                            }
+
+                            switch (data.perfil) {
+
+                                // Colaborador
+                                case 0:
+                                    $window.location.href = $scope.menuColaborador;
+                                    break;
+
+                                    // Gestor
+                                case 1:
+                                    $window.location.href = $scope.menuGestor;
+                                    break;
+
+                                    // Admin
+                                default:
+                                case 2:
+                                    $window.location.href = $scope.menuUsuario;
+                                    break;
+                            }
+                            toastr.success('Login efetuado', 'Sucesso!');
+
+                        } else {
+                            toastr.error(data.Mensagem);
+                        }
+                    })
+                    .fail(function () {
+                        toastr.error('Falha ao realizar a ação, tente novamente.');
+                    });
+            }
+
+            if (e != null) {
+                e.preventDefault();
+            }
+        }
+    }
+
+    function ValidarLogin(login) {
+        if (typeof login == 'undefined' || login == null) {
             toastr.error('Objeto de login inválido');
             return false;
         }
 
-        if (typeof login.email == 'undefined' || login.email == null || login.email.length == 0)
-        {
+        if (typeof login.email == 'undefined' || login.email == null || login.email.length == 0) {
             toastr.error('E-mail informado inválido');
             return false;
         }
 
-        if (typeof login.senha == 'undefined' || login.senha == null || login.senha.length == 0)
-        {
+        if (typeof login.senha == 'undefined' || login.senha == null || login.senha.length == 0) {
             toastr.error('Senha informada inválida');
             return false;
         }
 
         return true;
+    }
+
+    // Inicializa os campos de login.
+    $scope.LimparLogin();
+
+    // Verifica se tem um objeto de login salvo e realiza o login.
+    // Caso contenha o parametro sair, somente matem os dados em tela mas não realiza o login.
+    if ($scope.login.email != '' && typeof $routeParams.sair == 'undefined') {
+        $scope.RealizarLogin($scope.login, null);
     }
 
 });
@@ -154,8 +204,7 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window)
         observacao: ''
     };
 
-    $scope.abrirSolicitacao = function(id)
-    {
+    $scope.abrirSolicitacao = function (id) {
         $scope.objViagem = $scope.solicitacoesViagem[Object.keys($scope.solicitacoesViagem).find(x => $scope.solicitacoesViagem[x].id === id)];
         $window.location.href = $scope.menuSolicitarViagem;
     }
@@ -182,8 +231,7 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window)
         }
     ];
 
-    $scope.status = [
-        {
+    $scope.status = [{
             text: 'Em Aberto',
             value: 0
         },
@@ -213,8 +261,7 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window)
         }
     ];
 
-    $scope.solicitacoesViagem = [
-        {
+    $scope.solicitacoesViagem = [{
             id: 1,
             origem: 'Blumenau - BR',
             destino: 'New York - USA',
@@ -398,12 +445,9 @@ projetoIntegrador.controller('errorController', function ($scope) {
 
                 function toggleElement(loading) {
 
-                    if (loading) 
-                    {
+                    if (loading) {
                         elem[0].style.display = "block";
-                    } 
-                    else 
-                    {
+                    } else {
                         elem[0].style.display = "none";
                     }
                 }
