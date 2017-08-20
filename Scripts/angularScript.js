@@ -72,13 +72,13 @@ projetoIntegrador.controller('mainController', function ($scope, $window) {
 
 projetoIntegrador.controller('loginController', function ($scope, $window, $routeParams, toastr) {
 
-    $scope.LimparLogin = function () {
+    $scope.LimparLogin = function (limpar) {
 
         // Valida login salvo com a opção 'lembrar selecionada'.
         var email = window.localStorage.getItem('email');
         var senha = window.localStorage.getItem('senha');
 
-        if (email != null && typeof email != 'undefined') {
+        if (email != null && typeof email != 'undefined' && (limpar == null || limpar == false)) {
             $scope.login = {
                 email: email,
                 senha: senha,
