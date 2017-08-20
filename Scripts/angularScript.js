@@ -80,7 +80,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window) {
     {
         // Sad i know, but true.
         $scope.menuLogin = $scope.usuarioLogado.Cargo == '' ? "/" : "";
-        $scope.menuGestor = $scope.usuarioLogado.Cargo == 'Gestor' ? '/#!/gestor/' : '';
+        $scope.menuGestor = $scope.usuarioLogado.Cargo == 'GESTOR' ? '/#!/gestor/' : '';
         $scope.menuSetor = $scope.usuarioLogado.Cargo == 'ADMINISTRADOR' ? '/#!/setor/' : '';
         $scope.menuUsuario = $scope.usuarioLogado.Cargo == 'ADMINISTRADOR' ? '/#!/usuario/' : '';
         $scope.menuColaborador = $scope.usuarioLogado.Cargo == 'COLABORADOR' ? '/#!/colaborador/' : '';
