@@ -60,14 +60,35 @@ projetoIntegrador.config(function ($routeProvider, $windowProvider, $locationPro
 // CONTROLLERs
 projetoIntegrador.controller('mainController', function ($scope, $window) {
 
-    $scope.menuLogin = "/";
-    $scope.menuGestor = '/#!/gestor/';
-    $scope.menuSetor = '/#!/setor/';
-    $scope.menuUsuario = '/#!/usuario/';
-    $scope.menuColaborador = '/#!/colaborador/';
-    $scope.menuSolicitarViagem = '/#!/solicitarViagem/';
-    $scope.menuSair = "/#!/?sair";
+    $scope.LimparUsuarioLogado = function (usuario) {
+        if (typeof usuario == 'undefined') {
+            $scope.usuarioLogado = {
+                Id: -1,
+                Cargo: ''
+            }
+        } else {
+            $scope.usuarioLogado = {
+                Id: typeof usuario.Id != 'undefined' ? usuario.Id : -1,
+                Cargo: typeof usuario.Cargo != 'undefined' ? usuario.Cargo : ''
+            }
+        }
 
+        Atualizarpaginas();
+    }
+
+    function Atualizarpaginas()
+    {
+        // Sad i know, but true.
+        $scope.menuLogin = $scope.usuarioLogado.Cargo == '' ? "/" : "";
+        $scope.menuGestor = $scope.usuarioLogado.Cargo == 'Gestor' ? '/#!/gestor/' : '';
+        $scope.menuSetor = $scope.usuarioLogado.Cargo == 'ADMINISTRADOR' ? '/#!/setor/' : '';
+        $scope.menuUsuario = $scope.usuarioLogado.Cargo == 'ADMINISTRADOR' ? '/#!/usuario/' : '';
+        $scope.menuColaborador = $scope.usuarioLogado.Cargo == 'COLABORADOR' ? '/#!/colaborador/' : '';
+        $scope.menuSolicitarViagem = $scope.usuarioLogado.Cargo == 'COLABORADOR' ? '/#!/solicitarViagem/' : '';
+        $scope.menuSair = $scope.usuarioLogado.Id >= 0 ? "/#!/?sair" : '';
+    }
+
+    $scope.LimparUsuarioLogado();
 });
 
 projetoIntegrador.controller('loginController', function ($scope, $window, $routeParams, toastr) {
@@ -119,6 +140,7 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                                 window.localStorage.removeItem('senha');
                             }
 
+                            $scope.LimparUsuarioLogado(data);
                             console.log(data.Id);
 
                             switch (data.Cargo) {
@@ -182,6 +204,10 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
     // Caso contenha o parametro sair, somente matem os dados em tela mas não realiza o login.
     if ($scope.login.email != '' && typeof $routeParams.sair == 'undefined') {
         $scope.RealizarLogin($scope.login, null);
+    }
+    else if ($routeParams.sair != 'undefined')
+    {
+        $scope.LimparUsuarioLogado();
     }
 
 });

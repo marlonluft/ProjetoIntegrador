@@ -30,37 +30,37 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li>
+                    <li ng-if="menuLogin.length > 0">
                         <a href="{{menuLogin}}">
                             <i class="fa fa-sign-in" aria-hidden="true"></i>
                             Login
                         </a>
                     </li>
-                    <li>
+                    <li ng-if="menuGestor.length > 0">
                         <a href="{{menuGestor}}">
                             <i class="fa fa-cogs" aria-hidden="true"></i>
                             Gestor
                         </a>
                     </li>
-                    <li>
+                    <li ng-if="menuSetor.length > 0">
                         <a href="{{menuSetor}}">
                             <i class="fa fa-users" aria-hidden="true"></i>
                             Setor
                         </a>
                     </li>
-                    <li>
+                    <li ng-if="menuUsuario.length > 0">
                         <a href="{{menuUsuario}}">
                             <i class="fa fa-user" aria-hidden="true"></i>
                             Usuario
                         </a>
                     </li>
-                    <li>
+                    <li ng-if="menuColaborador.length > 0">
                         <a href="{{menuColaborador}}">
                             <i class="fa fa-suitcase" aria-hidden="true"></i>
                             Colaborador
                         </a>
                     </li>
-                    <li>
+                    <li ng-if="menuSair.length > 0">
                         <a href="{{menuSair}}">
                             <i class="fa fa-sign-out" aria-hidden="true"></i>
                             Sair
