@@ -1,4 +1,4 @@
-<input class="btn btn-default" value="Novo" ng-click="NovoUsuario()" />
+<input class="btn btn-default" value="Novo" ng-click="AlterarItem(Usuario)" />
 
 <br/><br/>
 
@@ -6,64 +6,37 @@
     <table class="table table-striped table-hover ">
         <thead>
             <tr>
-                <th>Nome</th>
-                <th>Data de Admisão</th>
+                <th>Nome</th>                
                 <th>Cargo</th>
+                <th>Setor</th>
                 <th>Ação</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>Carlos Drummond de Andrade</td>
-                <td>10/02/2000</td>
-                <td>Colaborador</td>
+            <tr ng-repeat="item in ListaUsuarios">
+                <td ng-bind="item.Nome"></td>
+                <td ng-bind="item.Cargo"></td>
+                <td ng-bind="item.Setor"></td>
                 <td>
-                    <button class="btn btn-primary btn-sm" data-toggle="tooltip" title="Editar">
-                    <i class="fa fa-pencil" aria-hidden="true"></i>
-                </button>
-                    <button class="btn btn-danger btn-sm" data-toggle="tooltip" title="Excluir" ng-click="removerItem(0)">
-                    <i class="fa fa-trash" aria-hidden="true"></i>
-                </button>
-                </td>
-            </tr>
-            <tr>
-                <td>Barack Obama</td>
-                <td>23/10/2007</td>
-                <td>Gestor</td>
-                <td>
-                    <button class="btn btn-primary btn-sm" data-toggle="tooltip" title="Editar">
-                    <i class="fa fa-pencil" aria-hidden="true"></i>
-                </button>
-                    <button class="btn btn-danger btn-sm" data-toggle="tooltip" title="Excluir" ng-click="removerItem(0)">
-                    <i class="fa fa-trash" aria-hidden="true"></i>
-                </button>
-                </td>
-            </tr>
-            <tr>
-                <td>Silvio Santos</td>
-                <td>03/10/1999</td>
-                <td>Administrador</td>
-                <td>
-                    <button class="btn btn-primary btn-sm" data-toggle="tooltip" title="Editar">
-                    <i class="fa fa-pencil" aria-hidden="true"></i>
-                </button>
+                    <button class="btn btn-primary btn-sm" data-toggle="tooltip" title="Editar" ng-click="AlterarItem(item)">
+                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm" data-toggle="tooltip" title="Excluir" ng-if="item.PodeRemover" ng-click="RemoverItem(item)">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
                 </td>
             </tr>
         </tbody>
     </table>
 </div>
 
-
-(O gestor só poderá ser removido se não houver setor vinculado a ele) (Caso só tenha 1 administrador o mesmo não poderá ser
-removido)
-
-<!-- MODAL ADICIONAR -->
+<!-- MODAL ADICIONAR/ALTERAR -->
 <div id="modalNovo" class="modal">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title">Novo usuário</h4>
+                <h4 class="modal-title">Usuário</h4>
             </div>
             <div class="modal-body">
 
@@ -74,46 +47,48 @@ removido)
                                 <label class="control-label" for="txtNome">Nome</label>
                             </td>
                             <td>
-                                <input class="form-control" id="txtNome" type="text" value="" ng-model="usuario.nome">
+                                <input class="form-control" id="txtNome" type="text" value="" ng-model="Usuario.Nome">
                             </td>
                         </tr>
-                        <tr>
-                            <td class="col-lg-3">
-                                <label class="control-label" for="txtAdmissao">Data de Admisão</label>
-                            </td>
-                            <td>
-                                <input class="form-control" id="txtAdmissao" type="date" value="" ng-model="usuario.admissao">
-                            </td>
-                        </tr>
-
                         <tr>
                             <td class="col-lg-3">
                                 <label for="cmbCargo" class="control-label">Cargo</label>
                             </td>
                             <td>
-                                <select class="form-control" id="cmbCargo" ng-model="usuario.cargo">
-                                    <option>Colaborador</option>
-                                    <option>Gestor</option>
-                                    <option>Administrador</option>
+                                <select class="form-control" id="cmbCargo" ng-model="Usuario.Cargo">
+                                    <option ng-value="COLABORADOR" selected="selected">Colaborador</option>
+                                    <option ng-value="GESTOR">Gestor</option>
+                                    <option ng-value="ADMINISTRADOR">Administrador</option>
                                 </select>
                             </td>
                         </tr>
 
                         <tr>
                             <td class="col-lg-3">
-                                <label class="control-label" for="txtUsuario">Usuario Login</label>
+                                <label for="cmbSetor" class="control-label">Setor</label>
                             </td>
                             <td>
-                                <input class="form-control" id="txtUsuario" type="text" value="" ng-model="usuario.usuario">
+                                <select class="form-control" id="cmbSetor" ng-model="Usuario.IdSetor">
+                                    <option selected="selected">Setor1</option>
+                                </select>
                             </td>
                         </tr>
 
                         <tr>
                             <td class="col-lg-3">
-                                <label class="control-label" for="txtSenha">Senha Login</label>
+                                <label class="control-label" for="txtEmail">Email</label>
                             </td>
                             <td>
-                                <input class="form-control" id="txtSenha" type="text" value="" ng-model="usuario.senha">
+                                <input class="form-control" id="txtEmail" type="text" value="" ng-model="Usuario.Email">
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="col-lg-3">
+                                <label class="control-label" for="txtSenha">Senha</label>
+                            </td>
+                            <td>
+                                <input class="form-control" id="txtSenha" type="text" value="" ng-model="Usuario.Senha">
                             </td>
                         </tr>
                     </tbody>
@@ -122,7 +97,7 @@ removido)
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary">Salvar</button>
+                <button type="button" class="btn btn-primary" ng-click="SalvarUsuario(Usuario)">Salvar</button>
             </div>
         </div>
     </div>
@@ -138,12 +113,12 @@ removido)
             </div>
             <div class="modal-body">
 
-                Você tem certeza que deseja remover o usuário ""? Esta ação não poderá ser desfeita.
+                Você tem certeza que deseja remover o usuário '{{Usuario.Nome}}'? Esta ação não poderá ser desfeita.
 
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger">Remover</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" ng-click="ConfirmarRemover(Usuario.Id)">Remover</button>
             </div>
         </div>
     </div>
