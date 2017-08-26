@@ -61,14 +61,16 @@ projetoIntegrador.config(function ($routeProvider, $windowProvider, $locationPro
 // CONTROLLERs
 projetoIntegrador.controller('mainController', function ($scope, $window) {
 
-    $scope.ValidarLogin = function()
-    {
-        if ($scope.usuarioLogado == null || 
+    $scope.ValidarLogin = function () {
+        if ($scope.usuarioLogado == null ||
             typeof $scope.usuarioLogado == 'undefined' ||
-            $scope.usuarioLogado.Id < 0)
-        {
+            $scope.usuarioLogado.Id < 0) {
             $window.location.href = $scope.menuLogin;
+
+            return false;
         }
+
+        return true;
     }
 
     $scope.LimparUsuarioLogado = function (usuario) {
@@ -89,8 +91,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window) {
         Atualizarpaginas();
     }
 
-    function Atualizarpaginas()
-    {
+    function Atualizarpaginas() {
         // Sad i know, but true.
         $scope.menuLogin = $scope.usuarioLogado.Cargo == '' ? "/" : "";
         $scope.menuGestor = $scope.usuarioLogado.Cargo == 'GESTOR' ? '/#!/gestor/' : '';
@@ -134,7 +135,7 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                     Email: login.email,
                     Senha: login.senha
                 };
-              
+
                 $http({
                     method: 'POST',
                     url: caminhoApi + '/usuario/logar',
@@ -142,12 +143,11 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                         'Content-Type': "application/json; charset=utf-"
                     },
                     data: JSON.stringify(model)
-                }).then(function (response) 
-                {
+                }).then(function (response) {
                     var data = response.data;
 
                     if (data.Sucesso) {
-                        
+
                         if (login.lembrar) {
                             window.localStorage.setItem('email', login.email);
                             window.localStorage.setItem('senha', login.senha);
@@ -155,36 +155,35 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                             window.localStorage.removeItem('email');
                             window.localStorage.removeItem('senha');
                         }
-                        
+
                         $scope.LimparUsuarioLogado(data);
                         console.log(data.Id);
-                        
+
                         switch (data.Cargo) {
-                        
+
                             // Colaborador
                             case 'COLABORADOR':
                                 $window.location.href = $scope.menuColaborador;
                                 break;
-                        
+
                             // Gestor
                             case 'GESTOR':
                                 $window.location.href = $scope.menuGestor;
                                 break;
-                        
+
                             // Admin
                             default:
                             case 'ADMINISTRADOR':
                                 $window.location.href = $scope.menuUsuario;
                                 break;
-                            }
-                            toastr.success('Login efetuado', 'Sucesso!');
-                        
-                        } else {
-                            toastr.error(data.Mensagem);
                         }
+                        toastr.success('Login efetuado', 'Sucesso!');
 
-                }, function(response)
-                {
+                    } else {
+                        toastr.error(data.Mensagem);
+                    }
+
+                }, function (response) {
                     toastr.error('Falha ao realizar a ação, tente novamente.');
                 });
             }
@@ -222,8 +221,7 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
     if ($scope.login.email != '' && typeof $routeParams.sair == 'undefined' && $scope.usuarioLogado.Logado) {
         $scope.RealizarLogin($scope.login, null);
     }
-    else if ($routeParams.sair != 'undefined')
-    {
+    else if ($routeParams.sair != 'undefined') {
         $scope.LimparUsuarioLogado();
     }
 
@@ -231,32 +229,32 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
 
 projetoIntegrador.controller('colaboradorController', function ($scope, $window, $http, toastr) {
 
-    $scope.ValidarLogin();
+    if ($scope.ValidarLogin()) {
 
-    $scope.visualizarViagem = false;
-    $scope.visualizarCustos = false;
+        $scope.visualizarViagem = false;
+        $scope.visualizarCustos = false;
 
-    $scope.solicitacoesViagem = [];
-    $scope.prestacoesConta = [];
+        $scope.solicitacoesViagem = [];
+        $scope.prestacoesConta = [];
 
-    $scope.objViagem = {
-        id: -1,
-        origem: '',
-        destino: '',
-        dataIda: '',
-        dataVolta: '',
-        status: 0,
-        justificativa: '',
-        motivo: 'Outro',
-        observacao: ''
-    };
+        $scope.objViagem = {
+            id: -1,
+            origem: '',
+            destino: '',
+            dataIda: '',
+            dataVolta: '',
+            status: 0,
+            justificativa: '',
+            motivo: 'Outro',
+            observacao: ''
+        };
 
-    $scope.abrirSolicitacao = function (id) {
-        $scope.objViagem = $scope.solicitacoesViagem[Object.keys($scope.solicitacoesViagem).find(x => $scope.solicitacoesViagem[x].id === id)];
-        $window.location.href = $scope.menuSolicitarViagem;
-    }
+        $scope.abrirSolicitacao = function (id) {
+            $scope.objViagem = $scope.solicitacoesViagem[Object.keys($scope.solicitacoesViagem).find(x => $scope.solicitacoesViagem[x].id === id)];
+            $window.location.href = $scope.menuSolicitarViagem;
+        }
 
-    $scope.categorias = [{
+        $scope.categorias = [{
             text: 'Passagem',
             value: 0
         },
@@ -276,9 +274,9 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
             text: 'Outro',
             value: 4
         }
-    ];
+        ];
 
-    $scope.status = [{
+        $scope.status = [{
             text: 'Em Aberto',
             value: 0
         },
@@ -306,9 +304,9 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
             text: 'Finalizado',
             value: 6
         }
-    ];
+        ];
 
-    $scope.solicitacoesViagem = [{
+        $scope.solicitacoesViagem = [{
             id: 1,
             origem: 'Blumenau - BR',
             destino: 'New York - USA',
@@ -385,253 +383,232 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
             motivo: 'Outro',
             observacao: ''
         }
-    ];
+        ];
 
-    $scope.removerItem = function (id) {
-        $('#modalRemover').modal('show');
-    }
+        $scope.removerItem = function (id) {
+            $('#modalRemover').modal('show');
+        }
 
-    $scope.reprovarItem = function (id) {
-        $('#modalReprovar').modal('show');
-    }
+        $scope.reprovarItem = function (id) {
+            $('#modalReprovar').modal('show');
+        }
 
-    $scope.enviarAprovacao = function (id) {
-        $('#modalEnviarAprovacao').modal('show');
-    }
+        $scope.enviarAprovacao = function (id) {
+            $('#modalEnviarAprovacao').modal('show');
+        }
 
-    $scope.adicionarPrestacaoConta = function (prestacao) {
-        var obj = angular.copy(prestacao);
-        obj.id = $scope.prestacoesConta.length;
+        $scope.adicionarPrestacaoConta = function (prestacao) {
+            var obj = angular.copy(prestacao);
+            obj.id = $scope.prestacoesConta.length;
 
-        $scope.prestacoesConta.push(obj);
-    }
+            $scope.prestacoesConta.push(obj);
+        }
 
-    $scope.recupearDescricao = function (value) {
-        var obj = $scope.categorias[Object.keys($scope.categorias).find(x => $scope.categorias[x].value === value)];
-        return obj.text;
-    }
+        $scope.recupearDescricao = function (value) {
+            var obj = $scope.categorias[Object.keys($scope.categorias).find(x => $scope.categorias[x].value === value)];
+            return obj.text;
+        }
 
-    $scope.recupearDescricaoStatus = function (value) {
-        var obj = $scope.status[Object.keys($scope.status).find(x => $scope.status[x].value === value)];
-        return obj.text;
-    }
+        $scope.recupearDescricaoStatus = function (value) {
+            var obj = $scope.status[Object.keys($scope.status).find(x => $scope.status[x].value === value)];
+            return obj.text;
+        }
 
-    $scope.recuperarTotalPrestacao = function () {
-        var total = 0;
+        $scope.recuperarTotalPrestacao = function () {
+            var total = 0;
 
-        $scope.prestacoesConta.forEach(function (element) {
-            total = total + (parseInt(element.quantidade) * parseFloat(element.valor));
-        }, this);
+            $scope.prestacoesConta.forEach(function (element) {
+                total = total + (parseInt(element.quantidade) * parseFloat(element.valor));
+            }, this);
 
-        return total.toFixed(2);
-    }
+            return total.toFixed(2);
+        }
 
-    $scope.removerPrestacao = function (id) {
-        for (var i = $scope.prestacoesConta.length - 1; i >= 0; i--) {
-            if ($scope.prestacoesConta[i].id == id) {
-                $scope.prestacoesConta.splice(i, 1);
-                break;
+        $scope.removerPrestacao = function (id) {
+            for (var i = $scope.prestacoesConta.length - 1; i >= 0; i--) {
+                if ($scope.prestacoesConta[i].id == id) {
+                    $scope.prestacoesConta.splice(i, 1);
+                    break;
+                }
             }
         }
     }
-
 });
 
 projetoIntegrador.controller('gestorController', function ($scope, $http, toastr) {
 
-    $scope.ValidarLogin();
+    if ($scope.ValidarLogin()) {
 
-    $scope.reprovarItem = function (id) {
-        $('#modalReprovar').modal('show');
+        $scope.reprovarItem = function (id) {
+            $('#modalReprovar').modal('show');
+        }
     }
-
 });
 
 projetoIntegrador.controller('setorController', function ($scope, $http, toastr) {
 
-    $scope.ValidarLogin();
+    if ($scope.ValidarLogin()) {
 
-    $scope.NovoSetor = function () {
-        $('#modalNovo').modal('show');
+        $scope.NovoSetor = function () {
+            $('#modalNovo').modal('show');
+        }
+
+        $scope.RemoverSetor = function (id) {
+            $('#modalRemover').modal('show');
+        }
+
     }
-
-    $scope.RemoverSetor = function (id) {
-        $('#modalRemover').modal('show');
-    }
-
 });
 
 projetoIntegrador.controller('usuarioController', function ($scope, $http, toastr) {
-    
-    $scope.ValidarLogin();
 
-    $scope.AlterarItem = function (model) 
-    {
-        $scope.Usuario = model;
-        $('#modalNovo').modal('show');
-    }
+    if ($scope.ValidarLogin()) {
 
-    $scope.RemoverItem = function (model) 
-    {
-        $scope.Usuario = model;
-        $('#modalRemover').modal('show');
-    }
+        $scope.AlterarItem = function (model) {
+            $scope.Usuario = angular.copy(model);
+            $('#modalNovo').modal('show');
+        }
 
-    $scope.ConfirmarRemover = function(id)
-    {
-        $http({
-            method: 'POST',
-            url: caminhoApi + '/usuario/remover',
-            headers: 
-            {
-                'Content-Type': "application/json; charset=utf-"
-            },
-            data: JSON.stringify(id)
-        }).then(function (response) 
-        {
-            var data = response.data;
+        $scope.RemoverItem = function (model) {
+            $scope.Usuario = angular.copy(model);
+            $('#modalRemover').modal('show');
+        }
 
-            if (data.Sucesso)
-            {
-                Limpar();
-                toastr.success('Usuário removido!', 'Sucesso!');
-            }
-            else
-            {
-                toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o usuário, tente novamente.');
-            }
-        },
-        function (response)
-        {
-            toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o usuário, tente novamente.');
-        });
-    }
-
-    function AtualizarListaUsuarios()
-    {
-        $http({
-            method: 'POST',
-            url: caminhoApi + '/usuario/listar',
-            headers: 
-            {
-                'Content-Type': "application/json; charset=utf-"
-            }
-        }).then(function (response) 
-        {
-            var data = response.data;
-
-            if (data.Sucesso)
-            {
-                $scope.ListaUsuarios = data.Lista;
-            }
-            else
-            {
-                toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de usuários, tente novamente.');
-            }
-        },
-        function (response)
-        {
-            toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de usuários, tente novamente.');
-        });
-    }
-
-    $scope.SalvarUsuario = function(model)
-    {
-        if (ValidarUsuario(model))
-        {
+        $scope.ConfirmarRemover = function (id) {
             $http({
                 method: 'POST',
-                url: caminhoApi + '/usuario/manipular',
-                headers: 
+                url: caminhoApi + '/usuario/remover',
+                headers:
                 {
                     'Content-Type': "application/json; charset=utf-"
                 },
-                data: JSON.stringify(model)
-            }).then(function (response) 
-            {
+                data: JSON.stringify(id)
+            }).then(function (response) {
                 var data = response.data;
-    
-                if (data.Sucesso)
-                {
+
+                if (data.Sucesso) {
                     Limpar();
-                    toastr.success('Usuário salvo!', 'Sucesso!');
+                    toastr.success('Usuário removido!', 'Sucesso!');
                 }
-                else
-                {
-                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o usuário, tente novamente.');
+                else {
+                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o usuário, tente novamente.');
                 }
             },
-            function (response)
-            {
-                toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o usuário, tente novamente.');
-            });
-        }            
+                function (response) {
+                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o usuário, tente novamente.');
+                });
+        }
+
+        function AtualizarListaUsuarios() {
+            $http({
+                method: 'POST',
+                url: caminhoApi + '/usuario/listar',
+                headers:
+                {
+                    'Content-Type': "application/json; charset=utf-"
+                }
+            }).then(function (response) {
+                var data = response.data;
+
+                if (data.Sucesso) {
+                    $scope.ListaUsuarios = data.Lista;
+                }
+                else {
+                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de usuários, tente novamente.');
+                }
+            },
+                function (response) {
+                    toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao atualizar a lista de usuários, tente novamente.');
+                });
+        }
+
+        $scope.SalvarUsuario = function (model) {
+            if (ValidarUsuario(model)) {
+                $http({
+                    method: 'POST',
+                    url: caminhoApi + '/usuario/manipular',
+                    headers:
+                    {
+                        'Content-Type': "application/json; charset=utf-"
+                    },
+                    data: JSON.stringify(model)
+                }).then(function (response) {
+                    var data = response.data;
+
+                    if (data.Sucesso) {
+                        Limpar();
+                        toastr.success('Usuário salvo!', 'Sucesso!');
+                    }
+                    else {
+                        toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o usuário, tente novamente.');
+                    }
+                },
+                    function (response) {
+                        toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o usuário, tente novamente.');
+                    });
+            }
+        }
+
+        function ValidarUsuario(model) {
+            if (model.Nome == null || model.Nome.length < 3) {
+                toastr.error("O nome deve conter no mínimo 3 caracteres", "Nome inválido");
+                return false;
+            }
+
+            if (model.Nome != null && model.Nome.length > 50) {
+                toastr.error("O nome deve conter no máximo 50 caracteres", "Nome inválido");
+                return false;
+            }
+
+            if (model.Email == null || model.Email.length < 5) {
+                toastr.error("O email deve conter no mínimo 5 caracteres", "Email inválido");
+                return false;
+            }
+
+            if (model.Email != null && model.Email.length > 50) {
+                toastr.error("O email deve conter no máximo 50 caracteres", "Email inválido");
+                return false;
+            }
+
+            var regex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            if (!regex.test(model.Email)) {
+                toastr.error("O email informado está fora dos padrões.", "Email inválido");
+                return false;
+            }
+
+            if (model.Senha == null || model.Senha.length < 5) {
+                toastr.error("A senha deve conter no mínimo 5 caracteres", "Senha inválida");
+                return false;
+            }
+
+            if (model.Senha != null && model.Senha.length > 50) {
+                toastr.error("A senha deve conter no máximo 50 caracteres", "Senha inválida");
+                return false;
+            }
+
+            return true;
+        }
+
+        $scope.LimparUsuario = function () {
+            $scope.Usuario = {
+                Nome: '',
+                Email: '',
+                Cargo: 'COLABORADOR',
+                Senha: '',
+                IdSetor: -1
+            };
+        }
+
+        function Limpar() {
+            $scope.LimparUsuario();
+
+            // Carrega a lista de usuários cadastrados no sistema.
+            AtualizarListaUsuarios();
+        }
+
+        // Inicializa os dados do controller.
+        Limpar();
     }
-
-    function ValidarUsuario(model)
-    {
-        if (model.Nome == null || model.Nome.length < 3)
-        {
-            toastr.error("O nome deve conter no mínimo 3 caracteres", "Nome inválido");
-            return false;
-        }
-
-        if (model.Nome != null && model.Nome.length > 50)
-        {
-            toastr.error("O nome deve conter no máximo 50 caracteres", "Nome inválido");
-            return false;
-        }
-        
-        if (model.Email == null || model.Email.length < 5)
-        {
-            toastr.error("O email deve conter no mínimo 5 caracteres", "Email inválido");
-            return false;
-        }
-
-        if (model.Email != null && model.Email.length > 50)
-        {
-            toastr.error("O email deve conter no máximo 50 caracteres", "Email inválido");
-            return false;
-        }
-
-        var regex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        if (!regex.test(model.Email))
-        {
-            toastr.error("O email informado está fora dos padrões.", "Email inválido");
-            return false;
-        }
-
-        if (model.Senha == null || model.Senha.length < 5)
-        {
-            toastr.error("A senha deve conter no mínimo 5 caracteres", "Senha inválida");
-            return false;
-        }
-
-        if (model.Senha != null && model.Senha.length > 50)
-        {
-            toastr.error("A senha deve conter no máximo 50 caracteres", "Senha inválida");
-            return false;
-        }
-
-        return true;
-    }
-
-    function Limpar()
-    {
-        $scope.Usuario = {
-            Nome: '',
-            Email: '',
-            Cargo: 'COLABORADOR',
-            Senha: '',
-            IdSetor: -1
-        };
-
-        // Carrega a lista de usuários cadastrados no sistema.
-        AtualizarListaUsuarios();
-    }
-
-    // Inicializa os dados do controller.
-    Limpar();
 });
 
 projetoIntegrador.controller('errorController', function ($scope, toastr) {
