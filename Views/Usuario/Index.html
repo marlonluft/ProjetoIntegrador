@@ -7,7 +7,7 @@
         <thead>
             <tr>
                 <th>Nome</th>                
-                <th>Cargo</th>
+                <th>Perfil</th>
                 <th>Setor</th>
                 <th>Ação</th>
             </tr>
@@ -15,7 +15,7 @@
         <tbody>
             <tr ng-repeat="item in ListaUsuarios">
                 <td ng-bind="item.Nome"></td>
-                <td ng-bind="item.Cargo"></td>
+                <td ng-bind="item.Perfil"></td>
                 <td ng-bind="item.Setor"></td>
                 <td>
                     <button class="btn btn-primary btn-sm" data-toggle="tooltip" title="Editar" ng-click="AlterarItem(item)">
@@ -52,10 +52,10 @@
                         </tr>
                         <tr>
                             <td class="col-lg-3">
-                                <label for="cmbCargo" class="control-label">Cargo</label>
+                                <label for="cmbPerfil" class="control-label">Perfil</label>
                             </td>
                             <td>
-                                <select class="form-control" id="cmbCargo" ng-model="Usuario.Cargo">
+                                <select class="form-control" id="cmbPerfil" ng-model="Usuario.Perfil">
                                     <option ng-value="COLABORADOR" selected="selected">Colaborador</option>
                                     <option ng-value="GESTOR">Gestor</option>
                                     <option ng-value="ADMINISTRADOR">Administrador</option>

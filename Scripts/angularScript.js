@@ -77,13 +77,13 @@ projetoIntegrador.controller('mainController', function ($scope, $window) {
         if (typeof usuario == 'undefined') {
             $scope.usuarioLogado = {
                 Id: -1,
-                Cargo: '',
+                Perfil: '',
                 Logado: false
             }
         } else {
             $scope.usuarioLogado = {
                 Id: typeof usuario.Id != 'undefined' ? usuario.Id : -1,
-                Cargo: typeof usuario.Cargo != 'undefined' ? usuario.Cargo : '',
+                Perfil: typeof usuario.Perfil != 'undefined' ? usuario.Perfil : '',
                 Logado: true
             }
         }
@@ -93,12 +93,12 @@ projetoIntegrador.controller('mainController', function ($scope, $window) {
 
     function Atualizarpaginas() {
         // Sad i know, but true.
-        $scope.menuLogin = $scope.usuarioLogado.Cargo == '' ? "/" : "";
-        $scope.menuGestor = $scope.usuarioLogado.Cargo == 'GESTOR' ? '/#!/gestor/' : '';
-        $scope.menuSetor = $scope.usuarioLogado.Cargo == 'ADMINISTRADOR' ? '/#!/setor/' : '';
-        $scope.menuUsuario = $scope.usuarioLogado.Cargo == 'ADMINISTRADOR' ? '/#!/usuario/' : '';
-        $scope.menuColaborador = $scope.usuarioLogado.Cargo == 'COLABORADOR' ? '/#!/colaborador/' : '';
-        $scope.menuSolicitarViagem = $scope.usuarioLogado.Cargo == 'COLABORADOR' ? '/#!/solicitarViagem/' : '';
+        $scope.menuLogin = $scope.usuarioLogado.Perfil == '' ? "/" : "";
+        $scope.menuGestor = $scope.usuarioLogado.Perfil == 'GESTOR' ? '/#!/gestor/' : '';
+        $scope.menuSetor = $scope.usuarioLogado.Perfil == 'ADMINISTRADOR' ? '/#!/setor/' : '';
+        $scope.menuUsuario = $scope.usuarioLogado.Perfil == 'ADMINISTRADOR' ? '/#!/usuario/' : '';
+        $scope.menuColaborador = $scope.usuarioLogado.Perfil == 'COLABORADOR' ? '/#!/colaborador/' : '';
+        $scope.menuSolicitarViagem = $scope.usuarioLogado.Perfil == 'COLABORADOR' ? '/#!/solicitarViagem/' : '';
         $scope.menuSair = $scope.usuarioLogado.Id >= 0 ? "/#!/?sair" : '';
     }
 
@@ -159,7 +159,7 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                         $scope.LimparUsuarioLogado(data);
                         console.log(data.Id);
 
-                        switch (data.Cargo) {
+                        switch (data.Perfil) {
 
                             // Colaborador
                             case 'COLABORADOR':
@@ -593,7 +593,7 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
             $scope.Usuario = {
                 Nome: '',
                 Email: '',
-                Cargo: 'COLABORADOR',
+                Perfil: 'COLABORADOR',
                 Senha: '',
                 IdSetor: -1
             };
