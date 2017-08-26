@@ -93,7 +93,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window) {
     $scope.LimparUsuarioLogado();
 });
 
-projetoIntegrador.controller('loginController', function ($scope, $window, $routeParams, toastr) {
+projetoIntegrador.controller('loginController', function ($scope, $window, $routeParams, toastr, $http) {
 
     $scope.LimparLogin = function (limpar) {
 
@@ -123,8 +123,61 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                     Email: login.email,
                     Senha: login.senha
                 };
+              
+                $http({
+                    method: 'POST',
+                    url: caminhoApi + '/usuario/logar',
+                    headers: {
+                        'Content-Type': "application/json; charset=utf-"
+                    },
+                    data: JSON.stringify(model)
+                }).then(function (response) 
+                {
+                    var data = response.data;
 
-                $.ajax({
+                    if (data.Sucesso) {
+                        
+                        if (login.lembrar) {
+                            window.localStorage.setItem('email', login.email);
+                            window.localStorage.setItem('senha', login.senha);
+                        } else {
+                            window.localStorage.removeItem('email');
+                            window.localStorage.removeItem('senha');
+                        }
+                        
+                        $scope.LimparUsuarioLogado(data);
+                        console.log(data.Id);
+                        
+                        switch (data.Cargo) {
+                        
+                            // Colaborador
+                            case 'COLABORADOR':
+                                $window.location.href = $scope.menuColaborador;
+                                break;
+                        
+                            // Gestor
+                            case 'GESTOR':
+                                $window.location.href = $scope.menuGestor;
+                                break;
+                        
+                            // Admin
+                            default:
+                            case 'ADMINISTRADOR':
+                                $window.location.href = $scope.menuUsuario;
+                                break;
+                            }
+                            toastr.success('Login efetuado', 'Sucesso!');
+                        
+                        } else {
+                            toastr.error(data.Mensagem);
+                        }
+
+                }, function(response)
+                {
+                    toastr.error('Falha ao realizar a ação, tente novamente.');
+                });
+
+                /*$.ajax({
                         url: caminhoApi + '/usuario/logar',
                         type: 'post',
                         dataType: 'json',
@@ -171,7 +224,7 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                     })
                     .fail(function () {
                         toastr.error('Falha ao realizar a ação, tente novamente.');
-                    });
+                    });*/
             }
 
             if (e != null) {
