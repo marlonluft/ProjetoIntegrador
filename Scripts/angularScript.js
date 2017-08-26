@@ -1,4 +1,5 @@
 var caminhoApi = "http://104.41.50.175:8080/ProjetoIntegradorAPI/rest";
+//var caminhoApi = "http://localhost:8080/ProjetoIntegradorAPI/rest";
 
 var projetoIntegrador = angular.module('projetoIntegrador', ['ngRoute', 'ngAnimate', 'toastr']);
 
@@ -59,6 +60,16 @@ projetoIntegrador.config(function ($routeProvider, $windowProvider, $locationPro
 
 // CONTROLLERs
 projetoIntegrador.controller('mainController', function ($scope, $window) {
+
+    $scope.ValidarUsuario = function()
+    {
+        if ($scope.usuarioLogado == null || 
+            typeof $scope.usuarioLogado == 'undefined' ||
+            $scope.usuarioLogado.Id < 0)
+        {
+            $window.location.href = $scope.menuLogin;
+        }
+    }
 
     $scope.LimparUsuarioLogado = function (usuario) {
         if (typeof usuario == 'undefined') {
@@ -176,55 +187,6 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                 {
                     toastr.error('Falha ao realizar a ação, tente novamente.');
                 });
-
-                /*$.ajax({
-                        url: caminhoApi + '/usuario/logar',
-                        type: 'post',
-                        dataType: 'json',
-                        contentType: "application/json; charset=utf-8",
-                        data: JSON.stringify(model)
-                    })
-                    .done(function (data) {
-                        if (data.Sucesso) {
-
-                            if (login.lembrar) {
-                                window.localStorage.setItem('email', login.email);
-                                window.localStorage.setItem('senha', login.senha);
-                            } else {
-                                window.localStorage.removeItem('email');
-                                window.localStorage.removeItem('senha');
-                            }
-
-                            $scope.LimparUsuarioLogado(data);
-                            console.log(data.Id);
-
-                            switch (data.Cargo) {
-
-                                // Colaborador
-                                case 'COLABORADOR':
-                                    $window.location.href = $scope.menuColaborador;
-                                    break;
-
-                                    // Gestor
-                                case 'GESTOR':
-                                    $window.location.href = $scope.menuGestor;
-                                    break;
-
-                                    // Admin
-                                default:
-                                case 'ADMINISTRADOR':
-                                    $window.location.href = $scope.menuUsuario;
-                                    break;
-                            }
-                            toastr.success('Login efetuado', 'Sucesso!');
-
-                        } else {
-                            toastr.error(data.Mensagem);
-                        }
-                    })
-                    .fail(function () {
-                        toastr.error('Falha ao realizar a ação, tente novamente.');
-                    });*/
             }
 
             if (e != null) {
@@ -268,6 +230,8 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
 });
 
 projetoIntegrador.controller('colaboradorController', function ($scope, $window) {
+
+    $scope.ValidarUsuario();
 
     $scope.visualizarViagem = false;
     $scope.visualizarCustos = false;
@@ -475,6 +439,8 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window)
 
 projetoIntegrador.controller('gestorController', function ($scope) {
 
+    $scope.ValidarUsuario();
+
     $scope.reprovarItem = function (id) {
         $('#modalReprovar').modal('show');
     }
@@ -482,6 +448,8 @@ projetoIntegrador.controller('gestorController', function ($scope) {
 });
 
 projetoIntegrador.controller('setorController', function ($scope) {
+
+    $scope.ValidarUsuario();
 
     $scope.NovoSetor = function () {
         $('#modalNovo').modal('show');
@@ -494,6 +462,8 @@ projetoIntegrador.controller('setorController', function ($scope) {
 });
 
 projetoIntegrador.controller('usuarioController', function ($scope) {
+
+    $scope.ValidarUsuario();
 
     $scope.NovoUsuario = function () {
         $('#modalNovo').modal('show');
