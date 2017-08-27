@@ -563,6 +563,7 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
 
                     if (data.Sucesso) {
                         Limpar(true);
+                        $('#modalRemover').modal("hide");
                         toastr.success('Setor removido!', 'Sucesso!');
                     }
                     else {
@@ -589,6 +590,7 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
 
                     if (data.Sucesso) {
                         Limpar(true);
+                        $('#modalNovo').modal("hide");
                         toastr.success('Setor salvo!', 'Sucesso!');
                     }
                     else {
@@ -675,6 +677,7 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
 
                 if (data.Sucesso) {
                     Limpar(true);
+                    $('#modalRemover').modal("hide");
                     toastr.success('Usuário removido!', 'Sucesso!');
                 }
                 else {
@@ -701,6 +704,7 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
 
                     if (data.Sucesso) {
                         Limpar(true);
+                        $('#modalNovo').modal("hide");
                         toastr.success('Usuário salvo!', 'Sucesso!');
                     }
                     else {
