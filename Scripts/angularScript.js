@@ -1,5 +1,5 @@
-//var caminhoApi = "http://104.41.50.175:8080/ProjetoIntegradorAPI/rest";
-var caminhoApi = "http://localhost:8080/ProjetoIntegradorAPI/rest";
+var caminhoApi = "http://104.41.50.175:8080/ProjetoIntegradorAPI/rest";
+//var caminhoApi = "http://localhost:8080/ProjetoIntegradorAPI/rest";
 
 var projetoIntegrador = angular.module('projetoIntegrador', ['ngRoute', 'ngAnimate', 'toastr']);
 
