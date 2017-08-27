@@ -1,4 +1,4 @@
-<input class="btn btn-default" value="Novo" ng-click="NovoSetor()" />
+<input class="btn btn-default" value="Novo" ng-click="LimparSetor();AlterarItem(Setor);" />
 
 <br/><br/>
 
@@ -18,32 +18,30 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>Desenvolvimento</td>
-                <td>Barack Obama</td>
-                <td>25</td>
+            <tr ng-repeat="item in Setores">
+                <td ng-bind="item.Nome"></td>
+                <td ng-bind="item.Gestor"></td>
+                <td ng-bind="item.Colaboradores"></td>
                 <td>
-                    <button class="btn btn-primary btn-sm" data-toggle="tooltip" title="Editar">
-                    <i class="fa fa-pencil" aria-hidden="true"></i>
-                </button>
-                    <button class="btn btn-danger btn-sm" data-toggle="tooltip" title="Excluir" ng-click="RemoverSetor(0)">
-                    <i class="fa fa-trash" aria-hidden="true"></i>
-                </button>
+                    <button class="btn btn-primary btn-sm" data-toggle="tooltip" title="Editar" ng-click="AlterarItem(item)">
+                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm" data-toggle="tooltip" title="Excluir" ng-if="item.PodeRemover" ng-click="RemoverItem(item)">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
                 </td>
             </tr>
         </tbody>
     </table>
 </div>
 
-(O setor só poderá ser removido se não houver colaboradores vinculados a ele)
-
-<!-- MODAL ADICIONAR -->
+<!-- MODAL ADICIONAR/ALTERAR -->
 <div id="modalNovo" class="modal">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title">Novo setor</h4>
+                <h4 class="modal-title">Setor</h4>
             </div>
             <div class="modal-body">
 
@@ -54,7 +52,7 @@
                                 <label class="control-label" for="txtNome">Setor</label>
                             </td>
                             <td>
-                                <input class="form-control" id="txtNome" type="text" value="" ng-model="setor.nome">
+                                <input class="form-control" id="txtNome" type="text" value="" ng-model="Setor.Nome">
                             </td>
                         </tr>
                         <tr>
@@ -62,9 +60,16 @@
                                 <label for="cmbGestor" class="control-label">Gestor</label>
                             </td>
                             <td>
-                                <select class="form-control" id="cmbGestor" ng-model="setor.cargo">
-                                    <option>Barack Obama</option>
-                                </select>
+                                <div class="col-lg-7" style="padding: 0;padding-right: 10px;">
+                                    <select class="form-control" id="cmbGestor" ng-model="Setor.Gestor">
+                                        <option ng-repeat="item in ListaGestores" ng-value="item.Nome" ng-bind="item.Nome"></option>
+                                    </select>   
+                                </div>
+                                <div class="col-lg-2" style="line-height: 35px;padding: 0;">
+                                    <button class="btn btn-info btn-sm" data-toggle="tooltip" title="Atualizar Gestores" ng-click="BuscarGestores()">
+                                        <i class="fa fa-refresh" aria-hidden="true"></i>
+                                    </button>             
+                                </div>                
                             </td>
                         </tr>
                     </tbody>
@@ -73,7 +78,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary">Salvar</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="SalvarSetor(Setor)">Salvar</button>
             </div>
         </div>
     </div>
@@ -89,12 +94,12 @@
             </div>
             <div class="modal-body">
 
-                Você tem certeza que deseja remover o setor ""? Esta ação não poderá ser desfeita.
+                Você tem certeza que deseja remover o setor '{{Setor.Nome}}'? Esta ação não poderá ser desfeita.
 
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger">Remover</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" ng-click="ConfirmarRemover(Setor.Id)">Remover</button>
             </div>
         </div>
     </div>

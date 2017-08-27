@@ -59,7 +59,7 @@ projetoIntegrador.config(function ($routeProvider, $windowProvider, $locationPro
 });
 
 // CONTROLLERs
-projetoIntegrador.controller('mainController', function ($scope, $window, $http) {
+projetoIntegrador.controller('mainController', function ($scope, $window, $http, toastr) {
 
     $scope.ValidarLogin = function () {
         if ($scope.usuarioLogado == null ||
@@ -103,40 +103,36 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http)
     }
 
     /* Funções de pesquisa compartilhadas */
-    $scope.BuscarSetores = function()
-    {
+    $scope.BuscarSetores = function () {
         $http({
             method: 'POST',
             url: caminhoApi + '/setor/listar',
             headers:
             {
-                'Content-Type': "application/json; charset=utf-"
+                'Content-Type': "application/json; charset=utf-8"
             }
-        }).then(function (response) 
-        {
+        }).then(function (response) {
             var data = response.data;
 
-            if (data.Sucesso) 
-            {
+            if (data.Sucesso) {
                 $scope.Setores = data.Lista;
             }
-            else 
-            {
+            else {
                 toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de setores, tente novamente.');
             }
         },
-        function (response) {
-            toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de setores, tente novamente.');
-        });
+            function (response) {
+                toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de setores, tente novamente.');
+            });
     }
 
-    $scope.BuscarUsuarios = function() {
+    $scope.BuscarUsuarios = function () {
         $http({
             method: 'POST',
             url: caminhoApi + '/usuario/listar',
             headers:
             {
-                'Content-Type': "application/json; charset=utf-"
+                'Content-Type': "application/json; charset=utf-8"
             }
         }).then(function (response) {
             var data = response.data;
@@ -152,14 +148,37 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http)
                 toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao atualizar a lista de usuários, tente novamente.');
             });
     }
+
+    $scope.BuscarGestores = function () {
+        $http({
+            method: 'POST',
+            url: caminhoApi + '/usuario/listarGestores',
+            headers:
+            {
+                'Content-Type': "application/json; charset=utf-8"
+            }
+        }).then(function (response) {
+            var data = response.data;
+
+            if (data.Sucesso) {
+                $scope.ListaGestores = data.Lista;
+            }
+            else {
+                toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de gestores, tente novamente.');
+            }
+        },
+            function (response) {
+                toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao atualizar a lista de gestores, tente novamente.');
+            });
+    }
     /* FIM Funções de pesquisa compartilhadas */
 
-    function Limpar()
-    {
+    function Limpar() {
         $scope.LimparUsuarioLogado();
 
         $scope.ListaUsuarios = [];
         $scope.Setores = [];
+        $scope.ListaGestores = [];
     }
 
     Limpar();
@@ -509,25 +528,105 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
 
     if ($scope.ValidarLogin()) {
 
-        $scope.NovoSetor = function () {
+        $scope.AlterarItem = function (model) {
+            $scope.Setor = angular.copy(model);
+
+            if ($scope.ListaGestores.length == 0) {
+                $scope.BuscarGestores();
+            }
+
             $('#modalNovo').modal('show');
         }
 
-        $scope.RemoverSetor = function (id) {
+        $scope.RemoverItem = function (model) {
+            $scope.Setor = angular.copy(model);
             $('#modalRemover').modal('show');
         }
 
-        function Limpar(atualizar)
-        {
+        $scope.ConfirmarRemover = function (id) {
+            $http({
+                method: 'POST',
+                url: caminhoApi + '/setor/remover',
+                headers:
+                {
+                    'Content-Type': "application/json; charset=utf-"
+                },
+                data: JSON.stringify(id)
+            }).then(function (response) {
+                var data = response.data;
+
+                if (data.Sucesso) {
+                    Limpar(true);
+                    toastr.success('Setor removido!', 'Sucesso!');
+                }
+                else {
+                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o setor, tente novamente.');
+                }
+            },
+                function (response) {
+                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o setor, tente novamente.');
+                });
+        }
+
+        $scope.SalvarSetor = function (model) {
+            if (ValidarSetor(model)) {
+                $http({
+                    method: 'POST',
+                    url: caminhoApi + '/setor/manipular',
+                    headers:
+                    {
+                        'Content-Type': "application/json; charset=utf-"
+                    },
+                    data: JSON.stringify(model)
+                }).then(function (response) {
+                    var data = response.data;
+
+                    if (data.Sucesso) {
+                        Limpar(true);
+                        toastr.success('Setor salvo!', 'Sucesso!');
+                    }
+                    else {
+                        toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o setor, tente novamente.');
+                    }
+                },
+                    function (response) {
+                        toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o setor, tente novamente.');
+                    });
+            }
+        }
+
+        function ValidarSetor(model) {
+            if (model.Nome == null || model.Nome.length < 3) {
+                toastr.error("O nome deve conter no mínimo 3 caracteres", "Nome inválido");
+                return false;
+            }
+
+            if (model.Nome != null && model.Nome.length > 50) {
+                toastr.error("O nome deve conter no máximo 50 caracteres", "Nome inválido");
+                return false;
+            }
+
+            return true;
+        }
+
+        function Limpar(atualizar) {
             // Carrega a lista de setores cadastrados no sistema.
-            if ($scope.Setores.length == 0 || atualizar)
-            {
+            if ($scope.Setores.length == 0 || atualizar) {
                 $scope.BuscarSetores();
             }
         }
 
+        $scope.LimparSetor = function () {
+            $scope.Setor = {
+                Nome: '',
+                Gestor: '',
+                IdGestor: -1,
+                Id: -1
+            };
+        }
+
         Limpar();
-    }    
+    }
 });
 
 projetoIntegrador.controller('usuarioController', function ($scope, $http, toastr) {
@@ -537,8 +636,7 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
         $scope.AlterarItem = function (model) {
             $scope.Usuario = angular.copy(model);
 
-            if ($scope.Setores.length == 0 )
-            {
+            if ($scope.Setores.length == 0) {
                 $scope.BuscarSetores();
             }
 
@@ -570,9 +668,9 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                     toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o usuário, tente novamente.');
                 }
             },
-            function (response) {
-                toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o usuário, tente novamente.');
-            });
+                function (response) {
+                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o usuário, tente novamente.');
+                });
         }
 
         $scope.SalvarUsuario = function (model) {
@@ -648,17 +746,16 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                 Email: '',
                 Perfil: 'COLABORADOR',
                 Senha: '',
-                IdSetor: -1
+                IdSetor: -1,
+                Id: -1
             };
         }
 
-        function Limpar(atualizar) 
-        {
+        function Limpar(atualizar) {
             $scope.LimparUsuario();
 
             // Carrega a lista de usuários cadastrados no sistema.
-            if ($scope.ListaUsuarios.length == 0 || atualizar)
-            {
+            if ($scope.ListaUsuarios.length == 0 || atualizar) {
                 $scope.BuscarUsuarios();
             }
         }
