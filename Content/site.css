@@ -39,6 +39,10 @@ textarea {
     margin-bottom: 23px;
 }
 
+.modal-backdrop {
+    background-color: rgba(187, 187, 187, 0.3);
+ }
+
 .logo {
     font-family: 'Anton', sans-serif;
     color: white!important;

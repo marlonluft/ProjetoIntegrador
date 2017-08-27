@@ -59,7 +59,7 @@ projetoIntegrador.config(function ($routeProvider, $windowProvider, $locationPro
 });
 
 // CONTROLLERs
-projetoIntegrador.controller('mainController', function ($scope, $window) {
+projetoIntegrador.controller('mainController', function ($scope, $window, $http) {
 
     $scope.ValidarLogin = function () {
         if ($scope.usuarioLogado == null ||
@@ -102,7 +102,67 @@ projetoIntegrador.controller('mainController', function ($scope, $window) {
         $scope.menuSair = $scope.usuarioLogado.Id >= 0 ? "/#!/?sair" : '';
     }
 
-    $scope.LimparUsuarioLogado();
+    /* Funções de pesquisa compartilhadas */
+    $scope.BuscarSetores = function()
+    {
+        $http({
+            method: 'POST',
+            url: caminhoApi + '/setor/listar',
+            headers:
+            {
+                'Content-Type': "application/json; charset=utf-"
+            }
+        }).then(function (response) 
+        {
+            var data = response.data;
+
+            if (data.Sucesso) 
+            {
+                $scope.Setores = data.Lista;
+            }
+            else 
+            {
+                toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de setores, tente novamente.');
+            }
+        },
+        function (response) {
+            toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de setores, tente novamente.');
+        });
+    }
+
+    $scope.BuscarUsuarios = function() {
+        $http({
+            method: 'POST',
+            url: caminhoApi + '/usuario/listar',
+            headers:
+            {
+                'Content-Type': "application/json; charset=utf-"
+            }
+        }).then(function (response) {
+            var data = response.data;
+
+            if (data.Sucesso) {
+                $scope.ListaUsuarios = data.Lista;
+            }
+            else {
+                toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de usuários, tente novamente.');
+            }
+        },
+            function (response) {
+                toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao atualizar a lista de usuários, tente novamente.');
+            });
+    }
+    /* FIM Funções de pesquisa compartilhadas */
+
+    function Limpar()
+    {
+        $scope.LimparUsuarioLogado();
+
+        $scope.ListaUsuarios = [];
+        $scope.Setores = [];
+    }
+
+    Limpar();
 });
 
 projetoIntegrador.controller('loginController', function ($scope, $window, $routeParams, toastr, $http) {
@@ -457,7 +517,17 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
             $('#modalRemover').modal('show');
         }
 
-    }
+        function Limpar(atualizar)
+        {
+            // Carrega a lista de setores cadastrados no sistema.
+            if ($scope.Setores.length == 0 || atualizar)
+            {
+                $scope.BuscarSetores();
+            }
+        }
+
+        Limpar();
+    }    
 });
 
 projetoIntegrador.controller('usuarioController', function ($scope, $http, toastr) {
@@ -466,6 +536,12 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
 
         $scope.AlterarItem = function (model) {
             $scope.Usuario = angular.copy(model);
+
+            if ($scope.Setores.length == 0 )
+            {
+                $scope.BuscarSetores();
+            }
+
             $('#modalNovo').modal('show');
         }
 
@@ -487,39 +563,16 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                 var data = response.data;
 
                 if (data.Sucesso) {
-                    Limpar();
+                    Limpar(true);
                     toastr.success('Usuário removido!', 'Sucesso!');
                 }
                 else {
                     toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o usuário, tente novamente.');
                 }
             },
-                function (response) {
-                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o usuário, tente novamente.');
-                });
-        }
-
-        function AtualizarListaUsuarios() {
-            $http({
-                method: 'POST',
-                url: caminhoApi + '/usuario/listar',
-                headers:
-                {
-                    'Content-Type': "application/json; charset=utf-"
-                }
-            }).then(function (response) {
-                var data = response.data;
-
-                if (data.Sucesso) {
-                    $scope.ListaUsuarios = data.Lista;
-                }
-                else {
-                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de usuários, tente novamente.');
-                }
-            },
-                function (response) {
-                    toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao atualizar a lista de usuários, tente novamente.');
-                });
+            function (response) {
+                toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o usuário, tente novamente.');
+            });
         }
 
         $scope.SalvarUsuario = function (model) {
@@ -536,7 +589,7 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                     var data = response.data;
 
                     if (data.Sucesso) {
-                        Limpar();
+                        Limpar(true);
                         toastr.success('Usuário salvo!', 'Sucesso!');
                     }
                     else {
@@ -599,11 +652,15 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
             };
         }
 
-        function Limpar() {
+        function Limpar(atualizar) 
+        {
             $scope.LimparUsuario();
 
             // Carrega a lista de usuários cadastrados no sistema.
-            AtualizarListaUsuarios();
+            if ($scope.ListaUsuarios.length == 0 || atualizar)
+            {
+                $scope.BuscarUsuarios();
+            }
         }
 
         // Inicializa os dados do controller.

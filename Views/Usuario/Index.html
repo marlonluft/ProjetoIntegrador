@@ -9,7 +9,12 @@
                 <th>Nome</th>                
                 <th>Perfil</th>
                 <th>Setor</th>
-                <th>Ação</th>
+                <th>
+                    Ação
+                    <button class="btn btn-info btn-sm" style="float:right;" data-toggle="tooltip" title="Atualizar" ng-click="BuscarUsuarios()">
+                        <i class="fa fa-refresh" aria-hidden="true"></i>
+                    </button>
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -56,9 +61,9 @@
                             </td>
                             <td>
                                 <select class="form-control" id="cmbPerfil" ng-model="Usuario.Perfil">
-                                    <option ng-value="COLABORADOR" selected="selected">Colaborador</option>
-                                    <option ng-value="GESTOR">Gestor</option>
-                                    <option ng-value="ADMINISTRADOR">Administrador</option>
+                                    <option ng-value="'COLABORADOR'">Colaborador</option>
+                                    <option ng-value="'GESTOR'">Gestor</option>
+                                    <option ng-value="'ADMINISTRADOR'">Administrador</option>
                                 </select>
                             </td>
                         </tr>
@@ -68,8 +73,8 @@
                                 <label for="cmbSetor" class="control-label">Setor</label>
                             </td>
                             <td>
-                                <select class="form-control" id="cmbSetor" ng-model="Usuario.IdSetor">
-                                    <option selected="selected">Setor1</option>
+                                <select class="form-control" id="cmbSetor" ng-model="Usuario.Setor">
+                                    <option ng-repeat="item in Setores" ng-value="item.Nome" ng-bind="item.Nome"></option>
                                 </select>
                             </td>
                         </tr>
