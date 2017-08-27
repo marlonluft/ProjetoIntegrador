@@ -663,7 +663,12 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
             $('#modalRemover').modal('show');
         }
 
-        $scope.ConfirmarRemover = function (id) {
+        $scope.ConfirmarRemover = function (id) 
+        {
+            var model = {
+                Id: id
+            }
+
             $http({
                 method: 'POST',
                 url: caminhoApi + '/usuario/remover',
@@ -671,7 +676,7 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                 {
                     'Content-Type': "application/json; charset=utf-"
                 },
-                data: JSON.stringify(id)
+                data: JSON.stringify(model)
             }).then(function (response) {
                 var data = response.data;
 
@@ -751,6 +756,16 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
 
             if (model.Senha != null && model.Senha.length > 50) {
                 toastr.error("A senha deve conter no máximo 50 caracteres", "Senha inválida");
+                return false;
+            }
+
+            if (model.Perfil == null || typeof model.Perfil == 'undefined') {
+                toastr.error("O perfil selecionado é inválido", "Perfil inválido");
+                return false;
+            }
+
+            if (model.IdSetor == null || (model.Perfil != 'GESTOR' && model.IdSetor < 0)) {
+                toastr.error("O setor selecionado é inválido", "Setor inválido");
                 return false;
             }
 
