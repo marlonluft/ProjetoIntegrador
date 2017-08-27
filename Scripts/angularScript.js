@@ -1,5 +1,5 @@
-var caminhoApi = "http://104.41.50.175:8080/ProjetoIntegradorAPI/rest";
-//var caminhoApi = "http://localhost:8080/ProjetoIntegradorAPI/rest";
+//var caminhoApi = "http://104.41.50.175:8080/ProjetoIntegradorAPI/rest";
+var caminhoApi = "http://localhost:8080/ProjetoIntegradorAPI/rest";
 
 var projetoIntegrador = angular.module('projetoIntegrador', ['ngRoute', 'ngAnimate', 'toastr']);
 
@@ -543,7 +543,12 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
             $('#modalRemover').modal('show');
         }
 
-        $scope.ConfirmarRemover = function (id) {
+        $scope.ConfirmarRemover = function (id) 
+        {
+            var model = {
+                Id: id
+            }
+
             $http({
                 method: 'POST',
                 url: caminhoApi + '/setor/remover',
@@ -551,18 +556,19 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
                 {
                     'Content-Type': "application/json; charset=utf-"
                 },
-                data: JSON.stringify(id)
-            }).then(function (response) {
-                var data = response.data;
+                data: JSON.stringify(model)
+            }).then(function (response) 
+                {
+                    var data = response.data;
 
-                if (data.Sucesso) {
-                    Limpar(true);
-                    toastr.success('Setor removido!', 'Sucesso!');
-                }
-                else {
-                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o setor, tente novamente.');
-                }
-            },
+                    if (data.Sucesso) {
+                        Limpar(true);
+                        toastr.success('Setor removido!', 'Sucesso!');
+                    }
+                    else {
+                        toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o setor, tente novamente.');
+                    }
+                },
                 function (response) {
                     toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o setor, tente novamente.');
                 });
@@ -605,6 +611,13 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
                 toastr.error("O nome deve conter no máximo 50 caracteres", "Nome inválido");
                 return false;
             }
+
+            if (model.IdGestor == null || typeof model.IdGestor == 'undefined' || model.IdGestor < 0)
+            {
+                toastr.error("O gestor selecionado é inválido", "Gestor inválido");
+                return false;
+            }
+
 
             return true;
         }
