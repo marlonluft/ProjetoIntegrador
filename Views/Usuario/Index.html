@@ -7,6 +7,7 @@
         <thead>
             <tr>
                 <th>Nome</th>
+                <th>CPF</th>
                 <th>Perfil</th>
                 <th>Setor</th>
                 <th>
@@ -19,6 +20,7 @@
         </thead>
         <tbody>
             <tr ng-repeat="item in ListaUsuarios">
+                <td class="cpf" ng-bind="item.CPF"></td>
                 <td ng-bind="item.Nome"></td>
                 <td ng-bind="item.Perfil"></td>
                 <td ng-bind="item.Setor"></td>
@@ -53,6 +55,14 @@
                             </td>
                             <td>
                                 <input class="form-control" id="txtNome" type="text" value="" ng-model="Usuario.Nome">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="col-lg-3">
+                                <label class="control-label" for="txtCPF">CPF</label>
+                            </td>
+                            <td>
+                                <input class="form-control cpf" id="txtCPF" type="text" value="" ng-model="Usuario.CPF">
                             </td>
                         </tr>
                         <tr>

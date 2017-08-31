@@ -189,18 +189,18 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
     $scope.LimparLogin = function (limpar) {
 
         // Valida login salvo com a opção 'lembrar selecionada'.
-        var email = window.localStorage.getItem('email');
+        var cpf = window.localStorage.getItem('cpf');
         var senha = window.localStorage.getItem('senha');
 
-        if (email != null && typeof email != 'undefined' && (limpar == null || limpar == false)) {
+        if (cpf != null && typeof cpf != 'undefined' && (limpar == null || limpar == false)) {
             $scope.login = {
-                email: email,
+                cpf: cpf,
                 senha: senha,
                 lembrar: true
             }
         } else {
             $scope.login = {
-                email: '',
+                cpf: '',
                 senha: '',
                 lembrar: false
             }
@@ -211,7 +211,7 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
         if (event.which == 13 || e == null) {
             if (ValidarLogin(login)) {
                 var model = {
-                    Email: login.email,
+                    CPF: login.cpf,
                     Senha: login.senha
                 };
 
@@ -228,15 +228,14 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                     if (data.Sucesso) {
 
                         if (login.lembrar) {
-                            window.localStorage.setItem('email', login.email);
+                            window.localStorage.setItem('cpf', login.cpf);
                             window.localStorage.setItem('senha', login.senha);
                         } else {
-                            window.localStorage.removeItem('email');
+                            window.localStorage.removeItem('cpf');
                             window.localStorage.removeItem('senha');
                         }
 
                         $scope.LimparUsuarioLogado(data);
-                        console.log(data.Id);
 
                         switch (data.Perfil) {
 
@@ -279,8 +278,8 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
             return false;
         }
 
-        if (typeof login.email == 'undefined' || login.email == null || login.email.length == 0) {
-            toastr.error('E-mail informado inválido');
+        if (typeof login.cpf == 'undefined' || login.cpf == null || login.cpf.length == 0) {
+            toastr.error('CPF informado inválido');
             return false;
         }
 
@@ -297,13 +296,16 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
 
     // Verifica se tem um objeto de login salvo e realiza o login.
     // Caso contenha o parametro sair, somente matem os dados em tela mas não realiza o login.
-    if ($scope.login.email != '' && typeof $routeParams.sair == 'undefined' && $scope.usuarioLogado.Logado) {
+    if ($scope.login.cpf != '' && typeof $routeParams.sair == 'undefined' && $scope.usuarioLogado.Logado) {
         $scope.RealizarLogin($scope.login, null);
     }
     else if ($routeParams.sair != 'undefined') {
         $scope.LimparUsuarioLogado();
     }
 
+    $(document).ready(function(){
+        $('.cpf').mask('000.000.000-00', {reverse: true});
+    });
 });
 
 projetoIntegrador.controller('colaboradorController', function ($scope, $window, $http, toastr) {
@@ -769,6 +771,17 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                 return false;
             }
 
+            var cpfRegex = /^(\d{3}\.\d{3}\.\d{3}-\d{2})|(^\d{3}\d{3}\d{3}\d{2})$/;
+            if (model.CPF == null || model.CPF.length != 14) {
+                toastr.error("O CPF deve conter 14 caracteres", "CPF inválida");
+                return false;
+            }
+            else if (!cpfRegex.test(model.CPF))
+            {
+                toastr.error("O CPF informado é inválido", "CPF inválida");
+                return false;
+            }
+
             return true;
         }
 
@@ -779,7 +792,8 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                 Perfil: 'COLABORADOR',
                 Senha: '',
                 IdSetor: -1,
-                Id: -1
+                Id: -1,
+                CPF: ''
             };
         }
 
@@ -794,6 +808,10 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
 
         // Inicializa os dados do controller.
         Limpar();
+
+        $(document).ready(function(){
+            $('.cpf').mask('000.000.000-00', {reverse: true});
+        });
     }
 });
 
