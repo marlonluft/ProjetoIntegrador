@@ -107,20 +107,18 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         $http({
             method: 'POST',
             url: caminhoApi + '/setor/listar',
-            headers:
-            {
+            headers: {
                 'Content-Type': "application/json; charset=utf-8"
             }
         }).then(function (response) {
-            var data = response.data;
+                var data = response.data;
 
-            if (data.Sucesso) {
-                $scope.Setores = data.Lista;
-            }
-            else {
-                toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de setores, tente novamente.');
-            }
-        },
+                if (data.Sucesso) {
+                    $scope.Setores = data.Lista;
+                } else {
+                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de setores, tente novamente.');
+                }
+            },
             function (response) {
                 toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de setores, tente novamente.');
             });
@@ -130,20 +128,18 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         $http({
             method: 'POST',
             url: caminhoApi + '/usuario/listar',
-            headers:
-            {
+            headers: {
                 'Content-Type': "application/json; charset=utf-8"
             }
         }).then(function (response) {
-            var data = response.data;
+                var data = response.data;
 
-            if (data.Sucesso) {
-                $scope.ListaUsuarios = data.Lista;
-            }
-            else {
-                toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de usuários, tente novamente.');
-            }
-        },
+                if (data.Sucesso) {
+                    $scope.ListaUsuarios = data.Lista;
+                } else {
+                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de usuários, tente novamente.');
+                }
+            },
             function (response) {
                 toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao atualizar a lista de usuários, tente novamente.');
             });
@@ -153,22 +149,41 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         $http({
             method: 'POST',
             url: caminhoApi + '/usuario/listarGestores',
-            headers:
-            {
+            headers: {
                 'Content-Type': "application/json; charset=utf-8"
             }
         }).then(function (response) {
-            var data = response.data;
+                var data = response.data;
 
-            if (data.Sucesso) {
-                $scope.ListaGestores = data.Lista;
-            }
-            else {
-                toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de gestores, tente novamente.');
-            }
-        },
+                if (data.Sucesso) {
+                    $scope.ListaGestores = data.Lista;
+                } else {
+                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de gestores, tente novamente.');
+                }
+            },
             function (response) {
                 toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao atualizar a lista de gestores, tente novamente.');
+            });
+    }
+
+    $scope.BuscarSolicitacoes = function () {
+        $http({
+            method: 'POST',
+            url: caminhoApi + '/solicitacao/listar',
+            headers: {
+                'Content-Type': "application/json; charset=utf-8"
+            }
+        }).then(function (response) {
+                var data = response.data;
+
+                if (data.Sucesso) {
+                    $scope.ListaSolicitacoes = data.Lista;
+                } else {
+                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de solicitações, tente novamente.');
+                }
+            },
+            function (response) {
+                toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao atualizar a lista de solicitações, tente novamente.');
             });
     }
     /* FIM Funções de pesquisa compartilhadas */
@@ -179,6 +194,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         $scope.ListaUsuarios = [];
         $scope.Setores = [];
         $scope.ListaGestores = [];
+        $scope.ListaSolicitacoes = [];
     }
 
     Limpar();
@@ -244,12 +260,12 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                                 $window.location.href = $scope.menuColaborador;
                                 break;
 
-                            // Gestor
+                                // Gestor
                             case 'GESTOR':
                                 $window.location.href = $scope.menuGestor;
                                 break;
 
-                            // Admin
+                                // Admin
                             default:
                             case 'ADMINISTRADOR':
                                 $window.location.href = $scope.menuUsuario;
@@ -298,13 +314,14 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
     // Caso contenha o parametro sair, somente matem os dados em tela mas não realiza o login.
     if ($scope.login.cpf != '' && typeof $routeParams.sair == 'undefined' && $scope.usuarioLogado.Logado) {
         $scope.RealizarLogin($scope.login, null);
-    }
-    else if ($routeParams.sair != 'undefined') {
+    } else if ($routeParams.sair != 'undefined') {
         $scope.LimparUsuarioLogado();
     }
 
-    $(document).ready(function(){
-        $('.cpf').mask('000.000.000-00', {reverse: true});
+    $(document).ready(function () {
+        $('.cpf').mask('000.000.000-00', {
+            reverse: true
+        });
     });
 });
 
@@ -312,169 +329,100 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
 
     if ($scope.ValidarLogin()) {
 
-        $scope.visualizarViagem = false;
-        $scope.visualizarCustos = false;
+        $scope.LimparSolicitacao = function()
+        {
+            $scope.Solicitacao = {
+                Id: -1,
+                IdUsuario: $scope.usuarioLogado.Id,
+                CidadeDestino: '',
+                CidadeOrigem: '',
+                DataIda: '',
+                DataVolta: '',
+                Motivo: '',
+                Observacao: '',
+                Status: 0,
+                UfDestino: '',
+                UfOrigem: ''
+            };
+        }
 
-        $scope.solicitacoesViagem = [];
-        $scope.prestacoesConta = [];
+        $scope.AlterarItem = function(model)
+        {
+            $scope.Solicitacao = angular.copy(model);
 
-        $scope.objViagem = {
-            id: -1,
-            origem: '',
-            destino: '',
-            dataIda: '',
-            dataVolta: '',
-            status: 0,
-            justificativa: '',
-            motivo: 'Outro',
-            observacao: ''
-        };
+            $window.location.href = $scope.menuSolicitarViagem;
+        }
 
-        $scope.abrirSolicitacao = function (id) {
-            $scope.objViagem = $scope.solicitacoesViagem[Object.keys($scope.solicitacoesViagem).find(x => $scope.solicitacoesViagem[x].id === id)];
+        $scope.AbrirSolicitacao = function (model) {
+            $scope.Solicitacao = angular.copy(model);
+
             $window.location.href = $scope.menuSolicitarViagem;
         }
 
         $scope.categorias = [{
-            text: 'Passagem',
-            value: 0
-        },
-        {
-            text: 'Hospedagem',
-            value: 1
-        },
-        {
-            text: 'Alimentação',
-            value: 2
-        },
-        {
-            text: 'Transporte',
-            value: 3
-        },
-        {
-            text: 'Outro',
-            value: 4
-        }
+                text: 'Passagem',
+                value: 0
+            },
+            {
+                text: 'Hospedagem',
+                value: 1
+            },
+            {
+                text: 'Alimentação',
+                value: 2
+            },
+            {
+                text: 'Transporte',
+                value: 3
+            },
+            {
+                text: 'Outro',
+                value: 4
+            }
         ];
 
         $scope.status = [{
-            text: 'Em Aberto',
-            value: 0
-        },
-        {
-            text: 'Aguardando Aprovação de Viagem',
-            value: 1
-        },
-        {
-            text: 'Solicitação Recusada',
-            value: 2
-        },
-        {
-            text: 'Em Aberto Prestação de Contas',
-            value: 3
-        },
-        {
-            text: 'Aguardando Aprovação de Contas',
-            value: 4
-        },
-        {
-            text: 'Prestação Recusada',
-            value: 5
-        },
-        {
-            text: 'Finalizado',
-            value: 6
-        }
+                text: 'Em Aberto',
+                value: 0
+            },
+            {
+                text: 'Aguardando Aprovação de Viagem',
+                value: 1
+            },
+            {
+                text: 'Solicitação Recusada',
+                value: 2
+            },
+            {
+                text: 'Em Aberto Prestação de Contas',
+                value: 3
+            },
+            {
+                text: 'Aguardando Aprovação de Contas',
+                value: 4
+            },
+            {
+                text: 'Prestação Recusada',
+                value: 5
+            },
+            {
+                text: 'Finalizado',
+                value: 6
+            }
         ];
 
-        $scope.solicitacoesViagem = [{
-            id: 1,
-            origem: 'Blumenau - BR',
-            destino: 'New York - USA',
-            dataIda: '11/10/2017',
-            dataVolta: '25/11/2017',
-            status: 0,
-            justificativa: '',
-            motivo: 'Outro',
-            observacao: ''
-        },
-        {
-            id: 2,
-            origem: 'Gaspar - BR',
-            destino: 'São Paulo - BR',
-            dataIda: '08/12/2017',
-            dataVolta: '20/01/2018',
-            status: 1,
-            justificativa: '',
-            motivo: 'Outro',
-            observacao: ''
-        },
-        {
-            id: 3,
-            origem: 'Gaspar - BR',
-            destino: 'São Paulo - BR',
-            dataIda: '08/12/2017',
-            dataVolta: '20/01/2018',
-            status: 2,
-            justificativa: 'Justificativa do gesto imediato referente a solicitação de viagem enviada.',
-            motivo: 'Outro',
-            observacao: ''
-        },
-        {
-            id: 4,
-            origem: 'Gaspar - BR',
-            destino: 'São Paulo - BR',
-            dataIda: '08/12/2017',
-            dataVolta: '20/01/2018',
-            status: 5,
-            justificativa: 'Justificativa do gesto imediato referente a recusa da prestação de custo enviada.',
-            motivo: 'Outro',
-            observacao: ''
-        },
-        {
-            id: 5,
-            origem: 'Gaspar - BR',
-            destino: 'São Paulo - BR',
-            dataIda: '08/12/2017',
-            dataVolta: '20/01/2018',
-            status: 6,
-            justificativa: '',
-            motivo: 'Outro',
-            observacao: ''
-        },
-        {
-            id: 7,
-            origem: 'Blumenau - BR',
-            destino: 'Tocantins - BR',
-            dataIda: '11/10/2017',
-            dataVolta: '25/11/2017',
-            status: 4,
-            justificativa: '',
-            motivo: 'Outro',
-            observacao: ''
-        },
-        {
-            id: 6,
-            origem: 'Blumenau - BR',
-            destino: 'Acre - BR',
-            dataIda: '11/10/2017',
-            dataVolta: '25/11/2017',
-            status: 3,
-            justificativa: '',
-            motivo: 'Outro',
-            observacao: ''
-        }
-        ];
-
-        $scope.removerItem = function (id) {
+        $scope.removerItem = function (model) {
+            $scope.Solicitacao = angular.copy(model);
             $('#modalRemover').modal('show');
         }
 
-        $scope.reprovarItem = function (id) {
+        $scope.reprovarItem = function (model) {
+            $scope.Solicitacao = angular.copy(model);
             $('#modalReprovar').modal('show');
         }
 
-        $scope.enviarAprovacao = function (id) {
+        $scope.enviarAprovacao = function (model) {
+            $scope.Solicitacao = angular.copy(model);
             $('#modalEnviarAprovacao').modal('show');
         }
 
@@ -513,6 +461,14 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
                 }
             }
         }
+
+        function Limpar()
+        {
+            $scope.BuscarSolicitacoes();
+            $scope.LimparSolicitacao();
+        }
+
+        Limpar();
     }
 });
 
@@ -545,8 +501,7 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
             $('#modalRemover').modal('show');
         }
 
-        $scope.ConfirmarRemover = function (id) 
-        {
+        $scope.ConfirmarRemover = function (id) {
             var model = {
                 Id: id
             }
@@ -554,21 +509,18 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
             $http({
                 method: 'POST',
                 url: caminhoApi + '/setor/remover',
-                headers:
-                {
+                headers: {
                     'Content-Type': "application/json; charset=utf-"
                 },
                 data: JSON.stringify(model)
-            }).then(function (response) 
-                {
+            }).then(function (response) {
                     var data = response.data;
 
                     if (data.Sucesso) {
                         Limpar(true);
                         $('#modalRemover').modal("hide");
                         toastr.success('Setor removido!', 'Sucesso!');
-                    }
-                    else {
+                    } else {
                         toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o setor, tente novamente.');
                     }
                 },
@@ -582,23 +534,21 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
                 $http({
                     method: 'POST',
                     url: caminhoApi + '/setor/manipular',
-                    headers:
-                    {
+                    headers: {
                         'Content-Type': "application/json; charset=utf-"
                     },
                     data: JSON.stringify(model)
                 }).then(function (response) {
-                    var data = response.data;
+                        var data = response.data;
 
-                    if (data.Sucesso) {
-                        Limpar(true);
-                        $('#modalNovo').modal("hide");
-                        toastr.success('Setor salvo!', 'Sucesso!');
-                    }
-                    else {
-                        toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o setor, tente novamente.');
-                    }
-                },
+                        if (data.Sucesso) {
+                            Limpar(true);
+                            $('#modalNovo').modal("hide");
+                            toastr.success('Setor salvo!', 'Sucesso!');
+                        } else {
+                            toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o setor, tente novamente.');
+                        }
+                    },
                     function (response) {
                         toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o setor, tente novamente.');
                     });
@@ -616,8 +566,7 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
                 return false;
             }
 
-            if (model.IdGestor == null || typeof model.IdGestor == 'undefined' || model.IdGestor < 0)
-            {
+            if (model.IdGestor == null || typeof model.IdGestor == 'undefined' || model.IdGestor < 0) {
                 toastr.error("O gestor selecionado é inválido", "Gestor inválido");
                 return false;
             }
@@ -665,8 +614,7 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
             $('#modalRemover').modal('show');
         }
 
-        $scope.ConfirmarRemover = function (id) 
-        {
+        $scope.ConfirmarRemover = function (id) {
             var model = {
                 Id: id
             }
@@ -674,23 +622,21 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
             $http({
                 method: 'POST',
                 url: caminhoApi + '/usuario/remover',
-                headers:
-                {
+                headers: {
                     'Content-Type': "application/json; charset=utf-"
                 },
                 data: JSON.stringify(model)
             }).then(function (response) {
-                var data = response.data;
+                    var data = response.data;
 
-                if (data.Sucesso) {
-                    Limpar(true);
-                    $('#modalRemover').modal("hide");
-                    toastr.success('Usuário removido!', 'Sucesso!');
-                }
-                else {
-                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o usuário, tente novamente.');
-                }
-            },
+                    if (data.Sucesso) {
+                        Limpar(true);
+                        $('#modalRemover').modal("hide");
+                        toastr.success('Usuário removido!', 'Sucesso!');
+                    } else {
+                        toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o usuário, tente novamente.');
+                    }
+                },
                 function (response) {
                     toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o usuário, tente novamente.');
                 });
@@ -701,23 +647,21 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                 $http({
                     method: 'POST',
                     url: caminhoApi + '/usuario/manipular',
-                    headers:
-                    {
+                    headers: {
                         'Content-Type': "application/json; charset=utf-"
                     },
                     data: JSON.stringify(model)
                 }).then(function (response) {
-                    var data = response.data;
+                        var data = response.data;
 
-                    if (data.Sucesso) {
-                        Limpar(true);
-                        $('#modalNovo').modal("hide");
-                        toastr.success('Usuário salvo!', 'Sucesso!');
-                    }
-                    else {
-                        toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o usuário, tente novamente.');
-                    }
-                },
+                        if (data.Sucesso) {
+                            Limpar(true);
+                            $('#modalNovo').modal("hide");
+                            toastr.success('Usuário salvo!', 'Sucesso!');
+                        } else {
+                            toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o usuário, tente novamente.');
+                        }
+                    },
                     function (response) {
                         toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o usuário, tente novamente.');
                     });
@@ -775,9 +719,7 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
             if (model.CPF == null || model.CPF.length != 14) {
                 toastr.error("O CPF deve conter 14 caracteres", "CPF inválida");
                 return false;
-            }
-            else if (!cpfRegex.test(model.CPF))
-            {
+            } else if (!cpfRegex.test(model.CPF)) {
                 toastr.error("O CPF informado é inválido", "CPF inválida");
                 return false;
             }
@@ -809,8 +751,10 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
         // Inicializa os dados do controller.
         Limpar();
 
-        $(document).ready(function(){
-            $('.cpf').mask('000.000.000-00', {reverse: true});
+        $(document).ready(function () {
+            $('.cpf').mask('000.000.000-00', {
+                reverse: true
+            });
         });
     }
 });

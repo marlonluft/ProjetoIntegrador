@@ -1,4 +1,4 @@
-<a class="btn btn-default" href="{{menuSolicitarViagem}}">Solicitar Viagem</a>
+<button class="btn btn-default" ng-click="LimparSolicitacao(); AlterarItem(Solicitacao);">Solicitar Viagem</button>
 
 <br/><br/>
 
@@ -29,28 +29,28 @@
                     </tr>
                 </thead>
                 <tfoot>
-                    <tr ng-show="(solicitacoesViagem | filter:{status: '!3'}).length == 0">
+                    <tr ng-show="(ListaSolicitacoes | filter:{Status: '!3'}).length == 0">
                         <td colspan="7" style="text-align: center;">
                             Nenhuma solicitação de viagem cadastrada.
                         </td>
                     </tr>
                 </tfoot>
                 <tbody>
-                    <tr ng-repeat="item in solicitacoesViagem | filter:{status: '!3'}">
-                        <td ng-bind="item.id"></td>
-                        <td ng-bind="item.origem"></td>
-                        <td ng-bind="item.destino"></td>
-                        <td ng-bind="item.dataIda"></td>
-                        <td ng-bind="item.dataVolta"></td>
-                        <td ng-bind="recupearDescricaoStatus(item.status)"></td>
+                    <tr ng-repeat="item in ListaSolicitacoes | filter:{Status: '!3'}">
+                        <td ng-bind="item.Id"></td>
+                        <td ng-bind="item.CidadeOrigem"></td>
+                        <td ng-bind="item.CidadeDestino"></td>
+                        <td ng-bind="item.DataIda"></td>
+                        <td ng-bind="item.DataVolta"></td>
+                        <td ng-bind="recupearDescricaoStatus(item.Status)"></td>
                         <td>
-                            <button ng-if="item.status == 0" class="btn btn-primary btn-sm" data-toggle="tooltip" title="Editar" ng-click="abrirSolicitacao(item.id)">
+                            <button ng-if="item.Status == 0" class="btn btn-primary btn-sm" data-toggle="tooltip" title="Editar" ng-click="AbrirSolicitacao(item)">
                                 <i class="fa fa-pencil" aria-hidden="true"></i>
                             </button>
-                            <button ng-if="item.status == 0" class="btn btn-danger btn-sm" data-toggle="tooltip" title="Excluir" ng-click="removerItem(item.id)">
+                            <button ng-if="item.Status == 0" class="btn btn-danger btn-sm" data-toggle="tooltip" title="Excluir" ng-click="removerItem(item)">
                                 <i class="fa fa-trash" aria-hidden="true"></i>
                             </button>
-                            <button ng-if="item.status != 0" class="btn btn-default btn-sm" data-toggle="tooltip" title="Visualizar" ng-click="abrirSolicitacao(item.id)">
+                            <button ng-if="item.Status != 0" class="btn btn-default btn-sm" data-toggle="tooltip" title="Visualizar" ng-click="AbrirSolicitacao(item)">
                                 <i class="fa fa-eye" aria-hidden="true"></i>
                             </button>
                         </td>
@@ -75,21 +75,21 @@
                     </tr>
                 </thead>
                 <tfoot>
-                    <tr ng-show="(solicitacoesViagem | filter:{status:3}).length == 0">
+                    <tr ng-show="(ListaSolicitacoes | filter:{Status:3}).length == 0">
                         <td colspan="6" style="text-align: center;">
                             Nenhuma solicitação de viagem aguardando prestação de contas.
                         </td>
                     </tr>
                 </tfoot>
                 <tbody>
-                    <tr ng-repeat="item in solicitacoesViagem | filter:{status:3}">
-                        <td ng-bind="item.id"></td>
-                        <td ng-bind="item.origem"></td>
-                        <td ng-bind="item.destino"></td>
-                        <td ng-bind="item.dataIda"></td>
-                        <td ng-bind="item.dataVolta"></td>
+                    <tr ng-repeat="item in ListaSolicitacoes | filter:{Status:3}">
+                        <td ng-bind="item.Id"></td>
+                        <td ng-bind="item.CidadeOrigem"></td>
+                        <td ng-bind="item.CidadeDestino"></td>
+                        <td ng-bind="item.DataIda"></td>
+                        <td ng-bind="item.DataVolta"></td>
                         <td>
-                            <button class="btn btn-primary btn-sm" data-toggle="tooltip" title="Prestar Conta" ng-click="abrirSolicitacao(item.id)">
+                            <button class="btn btn-primary btn-sm" data-toggle="tooltip" title="Prestar Conta" ng-click="abrirSolicitacao(item)">
                                 <i class="fa fa-gavel" aria-hidden="true"></i>
                             </button>
                         </td>
@@ -97,8 +97,6 @@
                 </tbody>
             </table>
         </div>
-
-        (Status: Em Aberto Prestação de Contas)
 
     </div>
 </div>
@@ -113,7 +111,7 @@
             </div>
             <div class="modal-body">
 
-                Você tem certeza que deseja remover o item ""? Esta ação não poderá ser desfeita.
+                Você tem certeza que deseja remover o item "{{Solicitacao.Id}}"? Esta ação não poderá ser desfeita.
 
             </div>
             <div class="modal-footer">
