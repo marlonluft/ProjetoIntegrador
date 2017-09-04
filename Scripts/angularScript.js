@@ -439,8 +439,15 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
         }
 
         $scope.recupearDescricaoStatus = function (value) {
-            var obj = $scope.status[Object.keys($scope.status).find(x => $scope.status[x].value === value)];
-            return obj.text;
+            try{
+                var obj = $scope.status[Object.keys($scope.status).find(x => $scope.status[x].value === value)];
+                return obj.text;
+            }
+            catch(ex)
+            {
+                toastr.error('Falha ao recuperar o status da solicitação');
+                return "";
+            }
         }
 
         $scope.recuperarTotalPrestacao = function () {

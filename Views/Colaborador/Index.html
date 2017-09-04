@@ -23,7 +23,7 @@
                         <th>
                             Ação
                             <button class="btn btn-info btn-sm" style="float:right;" data-toggle="tooltip" title="Atualizar">
-                                <i class="fa fa-refresh" aria-hidden="true"></i>
+                                <i class="fa fa-refresh" aria-hidden="true" ng-click="BuscarSolicitacoes()"></i>
                             </button>
                         </th>
                     </tr>
@@ -40,8 +40,8 @@
                         <td ng-bind="item.Id"></td>
                         <td ng-bind="item.CidadeOrigem"></td>
                         <td ng-bind="item.CidadeDestino"></td>
-                        <td ng-bind="item.DataIda"></td>
-                        <td ng-bind="item.DataVolta"></td>
+                        <td ng-bind="item.DataIda | date: 'dd/MM/yyyy'"></td>
+                        <td ng-bind="item.DataVolta | date: 'dd/MM/yyyy'"></td>
                         <td ng-bind="recupearDescricaoStatus(item.Status)"></td>
                         <td>
                             <button ng-if="item.Status == 0" class="btn btn-primary btn-sm" data-toggle="tooltip" title="Editar" ng-click="AbrirSolicitacao(item)">
@@ -86,8 +86,8 @@
                         <td ng-bind="item.Id"></td>
                         <td ng-bind="item.CidadeOrigem"></td>
                         <td ng-bind="item.CidadeDestino"></td>
-                        <td ng-bind="item.DataIda"></td>
-                        <td ng-bind="item.DataVolta"></td>
+                        <td ng-bind="item.DataIda | date: 'dd/MM/yyyy'"></td>
+                        <td ng-bind="item.DataVolta | date: 'dd/MM/yyyy'"></td>
                         <td>
                             <button class="btn btn-primary btn-sm" data-toggle="tooltip" title="Prestar Conta" ng-click="abrirSolicitacao(item)">
                                 <i class="fa fa-gavel" aria-hidden="true"></i>
