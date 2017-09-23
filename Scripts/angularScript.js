@@ -167,14 +167,20 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
     }
 
     $scope.BuscarSolicitacoes = function () {
+
+        $scope.Solicitacao = null;
+
         $http({
             method: 'POST',
             url: caminhoApi + '/solicitacao/listar',
+            data: JSON.stringify($scope.usuarioLogado.Id),
             headers: {
                 'Content-Type': "application/json; charset=utf-8"
             }
         }).then(function (response) {
                 var data = response.data;
+
+                console.log(data);
 
                 if (data.Sucesso) {
                     $scope.ListaSolicitacoes = data.Lista;
@@ -187,6 +193,26 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
             });
     }
     /* FIM Funções de pesquisa compartilhadas */
+
+    /* Outras funções compartilhadas */
+    $scope.LimparSolicitacao = function()
+    {
+        $scope.Solicitacao = {
+            Id: -1,
+            IdUsuario: $scope.usuarioLogado.Id,
+            CidadeOrigem: '',
+            UfOrigem: '',
+            CidadeDestino: '',
+            UfDestino: '',
+            DataIda: '',
+            DataVolta: '',
+            Motivo: 0,
+            Observacao: '',
+            Status: 0, // Status em aberto
+            Custos: []
+        };
+    }
+    /* FIM Outras funções compartilhadas */
 
     function Limpar() {
         $scope.LimparUsuarioLogado();
@@ -329,25 +355,7 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
 
     if ($scope.ValidarLogin()) {
 
-        $scope.LimparSolicitacao = function()
-        {
-            $scope.Solicitacao = {
-                Id: -1,
-                IdUsuario: $scope.usuarioLogado.Id,
-                CidadeDestino: '',
-                CidadeOrigem: '',
-                DataIda: '',
-                DataVolta: '',
-                Motivo: '',
-                Observacao: '',
-                Status: 0,
-                UfDestino: '',
-                UfOrigem: ''
-            };
-        }
-
-        $scope.AlterarItem = function(model)
-        {
+        $scope.AlterarItem = function(model) {
             $scope.Solicitacao = angular.copy(model);
 
             $window.location.href = $scope.menuSolicitarViagem;
@@ -427,10 +435,39 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
         }
 
         $scope.adicionarPrestacaoConta = function (prestacao) {
-            var obj = angular.copy(prestacao);
-            obj.id = $scope.prestacoesConta.length;
 
-            $scope.prestacoesConta.push(obj);
+            if (typeof prestacao == 'undefined' || prestacao == null)
+            {
+                toastr.error('Objeto de prestação de conta vazio.');
+            }
+            else if (typeof prestacao.categoria == 'undefined' || prestacao.categoria == null)
+            {
+                toastr.error('Categoria informada é inválida.');
+            }
+            else if (typeof prestacao.quantidade == 'undefined' || prestacao.quantidade == null)
+            {
+                toastr.error('Quantidade informada é inválida.');
+            }
+            else if (prestacao.quantidade > 10)
+            {
+                toastr.error('Quantidade não pode passar de 10.');
+            }
+            else if (typeof prestacao.valor == 'undefined' || prestacao.valor == null)
+            {
+                toastr.error('Valor informado é inválido.');
+            }
+            else
+            {
+                var obj = angular.copy(prestacao);
+                obj.valor = obj.valor.replace(".", "");
+                obj.valor = obj.valor.replace(",", ".");
+    
+                obj.id = $scope.Solicitacao.Custos.length;
+    
+                $scope.Solicitacao.Custos.push(obj);
+    
+                recuperarTotalPrestacao();
+            }           
         }
 
         $scope.recupearDescricao = function (value) {
@@ -450,32 +487,46 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
             }
         }
 
-        $scope.recuperarTotalPrestacao = function () {
+        function recuperarTotalPrestacao() {
             var total = 0;
 
-            $scope.prestacoesConta.forEach(function (element) {
+            $scope.Solicitacao.Custos.forEach(function (element) {
                 total = total + (parseInt(element.quantidade) * parseFloat(element.valor));
             }, this);
 
-            return total.toFixed(2);
+            $scope.CustoTotal = total.toFixed(2);
+
+            setTimeout(function ()
+            {
+                $('#txtValorTotal').mask("#.###.###.##0,00", {reverse: true});
+            }, 500);
         }
 
         $scope.removerPrestacao = function (id) {
-            for (var i = $scope.prestacoesConta.length - 1; i >= 0; i--) {
-                if ($scope.prestacoesConta[i].id == id) {
-                    $scope.prestacoesConta.splice(i, 1);
+            for (var i = $scope.Solicitacao.Custos.length - 1; i >= 0; i--) {
+                if ($scope.Solicitacao.Custos[i].id == id) {
+                    $scope.Solicitacao.Custos.splice(i, 1);
                     break;
                 }
             }
+
+            recuperarTotalPrestacao();
         }
 
         function Limpar()
         {
-            $scope.BuscarSolicitacoes();
-            $scope.LimparSolicitacao();
+            if (typeof $scope.Solicitacao == 'undefined' || $scope.Solicitacao == null)
+            {
+                $scope.BuscarSolicitacoes();
+            }
         }
 
         Limpar();
+
+        $(document).ready(function () {
+            $('#txtValor').mask("#.##0,00", {reverse: true});
+            $('#txtQuantidade').mask("00", {reverse: true});
+        });
     }
 });
 

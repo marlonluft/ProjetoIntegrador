@@ -113,18 +113,18 @@
                 </tr>
             </thead>
             <tfoot>
-                <tr ng-show="prestacoesConta.length > 0">
+                <tr ng-show="Solicitacao.Custos.length > 0">
                     <td colspan="2" style="text-align: right;">Valor Total:</td>
-                    <td ng-bind="recuperarTotalPrestacao()" colspan="2" style="text-align: left;"></td>
+                    <td colspan="2" id="txtValorTotal" ng-bind="CustoTotal" ng-init="0" style="text-align: left;"></td>
                 </tr>
-                <tr ng-show="prestacoesConta.length == 0">
+                <tr ng-show="Solicitacao.Custos.length == 0">
                     <td colspan="4" style="text-align: center;">
                         Nenhuma prestação de conta cadastrada.
                     </td>
                 </tr>
             </tfoot>
             <tbody>
-                <tr ng-repeat="conta in prestacoesConta track by conta.id">
+                <tr ng-repeat="conta in Solicitacao.Custos track by conta.id">
                     <td ng-bind="recupearDescricao(conta.categoria)"></td>
                     <td ng-bind="conta.quantidade"></td>
                     <td ng-bind="conta.valor"></td>
@@ -139,26 +139,26 @@
     </div>
 
     <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <button class="btn btn-success" data-toggle="tooltip" title="Enviar para Aprovação" ng-click="enviarAprovacao(0)">
+        <div class="col-md-12" style="text-align: center;">
+            <button class="btn btn-success" ng-if="Solicitacao.Status == 0" data-toggle="tooltip" title="Enviar para Aprovação" ng-click="enviarAprovacao(0)">
                 <i class="fa fa-check" aria-hidden="true"></i>
                 Enviar para Aprovação
             </button>
-            <button class="btn btn-primary" data-toggle="tooltip" title="Salvar">
+            <button class="btn btn-primary" ng-if="Solicitacao.Status == 0" data-toggle="tooltip" title="Salvar">
                 <i class="fa fa-floppy-o" aria-hidden="true"></i>
                 Salvar
             </button>
-            <button class="btn btn-danger" data-toggle="tooltip" title="Remover" ng-click="removerItem(0)">
+            <button class="btn btn-danger" ng-if="Solicitacao.Status == 0" data-toggle="tooltip" title="Remover" ng-click="removerItem(0)">
                 <i class="fa fa-trash" aria-hidden="true"></i>
                 Remover
             </button>
 
-            <button class="btn btn-success" data-toggle="tooltip" title="Aprovar">
+            <button class="btn btn-success" ng-if="Solicitacao.Status == 1 || Solicitacao.Status == 4" data-toggle="tooltip" title="Aprovar">
                 <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
                 Aprovar
             </button>
 
-            <button class="btn btn-danger" data-toggle="tooltip" title="Reprovar" ng-click="reprovarItem(0)">
+            <button class="btn btn-danger" ng-if="Solicitacao.Status == 1 || Solicitacao.Status == 4" data-toggle="tooltip" title="Reprovar" ng-click="reprovarItem(0)">
                 <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
                 Reprovar
             </button>
