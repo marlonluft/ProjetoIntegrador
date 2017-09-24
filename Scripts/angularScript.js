@@ -195,23 +195,32 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
     /* FIM Funções de pesquisa compartilhadas */
 
     /* Outras funções compartilhadas */
-    $scope.LimparSolicitacao = function()
+    $scope.LimparSolicitacao = function(model)
     {
-        $scope.Solicitacao = {
-            Id: -1,
-            IdUsuario: $scope.usuarioLogado.Id,
-            CidadeOrigem: '',
-            UfOrigem: '',
-            CidadeDestino: '',
-            UfDestino: '',
-            DataIda: '',
-            DataVolta: '',
-            Motivo: 0,
-            Observacao: '',
-            Status: 0, // Status em aberto
-            Justificativa: '',
-            Custos: []
-        };
+        if (model == null)
+        {
+            $scope.Solicitacao = {
+                Id: -1,
+                IdUsuario: $scope.usuarioLogado.Id,
+                CidadeOrigem: '',
+                UfOrigem: '',
+                CidadeDestino: '',
+                UfDestino: '',
+                DataIda: '',
+                DataVolta: '',
+                Motivo: 0,
+                Observacao: '',
+                Status: 0, // Status em aberto
+                Justificativa: '',
+                Custos: []
+            };
+        }
+        else
+        {
+            $scope.Solicitacao = angular.copy(model);
+            $scope.Solicitacao.DataIda = new Date(parseInt($scope.Solicitacao.DataIda));
+            $scope.Solicitacao.DataVolta = new Date(parseInt($scope.Solicitacao.DataVolta));
+        }
     }
     /* FIM Outras funções compartilhadas */
 
@@ -223,6 +232,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         $scope.ListaGestores = [];
         $scope.ListaSolicitacoes = [];
 
+        $scope.Solicitacao = null;
         $scope.ufLista = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
     }
 
@@ -358,16 +368,9 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
 
     if ($scope.ValidarLogin()) {
 
-        $scope.AlterarItem = function(model) {
-            $scope.Solicitacao = angular.copy(model);
-
-            $window.location.href = $scope.menuSolicitarViagem;
-        }
-
         $scope.AbrirSolicitacao = function (model) {
             $scope.Solicitacao = angular.copy(model);
-
-            $window.location.href = $scope.menuSolicitarViagem;
+            $window.location.href = $scope.menuSolicitarViagem;         
         }
 
         $scope.categorias = [{
@@ -521,14 +524,21 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
             // Realiza a ação de salvar e enviar para aprovação.
             if (validarSolicitacao(solicitacao, envioAprovacao))
             {
-                solicitacao.DataIdaS = solicitacao.DataIda;
-                solicitacao.DataIda = null;
+                var solViagem = angular.copy(solicitacao);
 
-                solicitacao.DataVoltaS = solicitacao.DataVolta;
-                solicitacao.DataVolta = null;
+                solViagem.DataIdaS = solViagem.DataIda;
+                solViagem.DataIda = null;
+
+                solViagem.DataVoltaS = solViagem.DataVolta;
+                solViagem.DataVolta = null;
+
+                for (var i = 0; i < solViagem.Custos.length; i++)
+                {
+                    solViagem.Custos[i].Tipo = $scope.recupearDescricao(solViagem.Custos[i].Tipo);                    
+                }
 
                 // Seta o usuário logado como o dono da solicitação.
-                solicitacao.IdUsuario = $scope.usuarioLogado.Id;
+                solViagem.IdUsuario = $scope.usuarioLogado.Id;
 
                 $http({
                     method: 'POST',
@@ -536,7 +546,7 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
                     headers: {
                         'Content-Type': "application/json; charset=utf-"
                     },
-                    data: JSON.stringify(solicitacao)
+                    data: JSON.stringify(solViagem)
                 }).then(function (response) {
                         var data = response.data;
     
@@ -544,8 +554,6 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
 
                         if (data.Sucesso) {
                             
-
-
                             toastr.success('Solicitação de viagem e prestação de custos' + envioAprovacao ? ' enviados para aprovação.' : ' salvos.' , 'Sucesso!');
                         } else {
                             toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao' + (envioAprovacao ? ' enviar para aprovação' : ' salvar') + ', tente novamente.');
@@ -555,6 +563,30 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
                         toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao' + (envioAprovacao ? ' enviar para aprovação' : ' salvar') + ', tente novamente.');
                     });
             }
+        }
+
+        $scope.confirmarRemoverSolicitacao = function(id)
+        {
+            $http({
+                method: 'POST',
+                url: caminhoApi + '/solicitacao/remover',
+                data: JSON.stringify(id.toString()),
+                headers: {
+                    'Content-Type': "application/json; charset=utf-8"
+                }
+            }).then(function (response) {
+                    var data = response.data;
+    
+                    if (data.Sucesso) {
+                        toastr.success('Solicitação de viagem removida com sucesso' , 'Sucesso!');
+                        $window.location.href = $scope.menuColaborador;
+                    } else {
+                        toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover a solicitação de viagem, tente novamente.');
+                    }
+                },
+                function (response) {
+                    toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao remover a solicitação de viagem, tente novamente.');
+                });
         }
 
         function Limpar()
