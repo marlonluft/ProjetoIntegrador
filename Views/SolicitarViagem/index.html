@@ -1,5 +1,4 @@
 <div class="form-horizontal">
-{{objViagem}}
     <div class="row">
         <div class="col-lg-12">
             <div class="page-header">
@@ -8,45 +7,63 @@
         </div>
     </div>
 
-    <div class="panel panel-danger" ng-if="objViagem.justificativa.length > 0 && objViagem.status == 2">
+    <div class="panel panel-danger" ng-if="Solicitacao.Justificativa.length > 0 && Solicitacao.status == 2">
         <div class="panel-heading">
-            <h3 class="panel-title">Motivo Reprovação</h3>
+            <h3 class="panel-title">Justificativa Reprovação</h3>
         </div>
-        <div class="panel-body" ng-bind="objViagem.justificativa"></div>
+        <div class="panel-body" ng-bind="Solicitacao.Justificativa"></div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2" for="txtOrigem">UF Origem</label>
+        <div class="col-md-10">
+            <select class="form-control" ng-model="Solicitacao.UfOrigem">
+                <option ng-value="uf" value="{{uf}}" ng-repeat="uf in ufLista">{{uf}}</option>
+            </select>
+        </div>
     </div>
 
     <div class="form-group">
         <label class="control-label col-md-2" for="txtOrigem">Origem</label>
         <div class="col-md-10">
-            <input class="form-control text-box single-line" id="txtOrigem" type="text" ng-model="objViagem.origem" ng-bind="objViagem.origem" />
+            <input class="form-control text-box single-line" id="txtOrigem" type="text" ng-model="Solicitacao.CidadeOrigem" ng-bind="Solicitacao.CidadeOrigem" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2" for="txtOrigem">UF Destino</label>
+        <div class="col-md-10">
+            <select class="form-control" ng-model="Solicitacao.UfDestino">
+                <option ng-value="uf" value="{{uf}}" ng-repeat="uf in ufLista">{{uf}}</option>
+            </select>
         </div>
     </div>
 
     <div class="form-group">
         <label class="control-label col-md-2" for="txtDestino">Destino</label>
         <div class="col-md-10">
-            <input class="form-control text-box single-line" id="txtDestino" type="text" ng-model="objViagem.destino" />
+            <input class="form-control text-box single-line" id="txtDestino" type="text" ng-model="Solicitacao.CidadeDestino" />
         </div>
     </div>
 
     <div class="form-group">
         <label class="control-label col-md-2" for="txtDataIda">Data Ida</label>
         <div class="col-md-10">
-            <input class="form-control text-box single-line" id="txtDataIda" type="date" ng-model="objViagem.dataIda" />
+            <input class="form-control text-box single-line" id="txtDataIda" type="date" ng-model="Solicitacao.DataIda" />
         </div>
     </div>
 
     <div class="form-group">
         <label class="control-label col-md-2" for="txtDataVolta">Data Volta</label>
         <div class="col-md-10">
-            <input class="form-control text-box single-line" id="txtDataVolta" type="date" ng-model="objViagem.dataVolta" />
+            <input class="form-control text-box single-line" id="txtDataVolta" type="date" ng-model="Solicitacao.DataVolta" />
         </div>
     </div>
 
     <div class="form-group">
         <label class="control-label col-md-2" for="txtMotivo">Motivo</label>
         <div class="col-md-10">
-            <select class="form-control" id="txtMotivo" ng-model="objViagem.motivo">
+            <select class="form-control" id="txtMotivo" ng-model="Solicitacao.Motivo">
                     <option selected="selected">Reunião</option>
                     <option>Apresentação</option>
                     <option>Workshop</option>
@@ -59,7 +76,7 @@
     <div class="form-group">
         <label class="control-label col-md-2" for="txtObservacoes">Observações</label>
         <div class="col-md-10">
-            <textarea class="form-control" style="width: 500px; height: 100px;" rows="5" id="txtObservacoes" ng-model="objViagem.observacao"></textarea>
+            <textarea class="form-control" style="width: 500px; height: 100px;" rows="5" id="txtObservacoes" ng-model="Solicitacao.Observacao"></textarea>
         </div>
     </div>
 
@@ -71,27 +88,27 @@
         </div>
     </div>
 
-    <div class="panel panel-danger" ng-if="objViagem.justificativa.length > 0 && objViagem.status == 5">
+    <div class="panel panel-danger" ng-if="Solicitacao.Justificativa.length > 0 && Solicitacao.status == 5">
         <div class="panel-heading">
-            <h3 class="panel-title">Motivo Reprovação</h3>
+            <h3 class="panel-title">Justificativa Reprovação</h3>
         </div>
-        <div class="panel-body" ng-bind="objViagem.justificativa"></div>
+        <div class="panel-body" ng-bind="Solicitacao.Justificativa"></div>
     </div>
 
     <div class="col-lg-12" style="margin-bottom: 30px;" ng-if="!visualizarCustos">
         <div class="col-lg-3">
             <label class="control-label" for="txtCategoria">Categoria</label>
-            <select class="form-control" id="txtCategoria" ng-model="conta.categoria">
+            <select class="form-control" id="txtCategoria" ng-model="conta.Tipo">
                 <option ng-repeat="item in categorias" ng-value="item.value" ng-bind="item.text"></option>
             </select>
         </div>
         <div class="col-lg-3">
             <label class="control-label" for="txtQuantidade">Quantidade</label>
-            <input class="form-control" id="txtQuantidade" type="number" min="1" value="1" ng-model="conta.quantidade">
+            <input class="form-control" id="txtQuantidade" type="number" min="1" value="1" ng-model="conta.Quantidade">
         </div>
         <div class="col-lg-3">
             <label class="control-label" for="txtValor">Valor</label>
-            <input class="form-control" id="txtValor" type="text" value="" ng-model="conta.valor">
+            <input class="form-control" id="txtValor" type="text" value="" ng-model="conta.ValorSolicitado">
         </div>
 
         <div class="col-lg-1" style="line-height: 65px;">
@@ -124,13 +141,13 @@
                 </tr>
             </tfoot>
             <tbody>
-                <tr ng-repeat="conta in Solicitacao.Custos track by conta.id">
-                    <td ng-bind="recupearDescricao(conta.categoria)"></td>
-                    <td ng-bind="conta.quantidade"></td>
-                    <td ng-bind="conta.valor"></td>
+                <tr ng-repeat="conta in Solicitacao.Custos track by conta.Id">
+                    <td ng-bind="recupearDescricao(conta.Tipo)"></td>
+                    <td ng-bind="conta.Quantidade"></td>
+                    <td ng-bind="conta.ValorSolicitado"></td>
                     <td>
                         <button class="btn btn-danger btn-sm" data-toggle="tooltip" title="Remover" ng-if="!visualizarCustos">
-                            <i class="fa fa-trash" aria-hidden="true" ng-click="removerPrestacao(conta.id)"></i>
+                            <i class="fa fa-trash" aria-hidden="true" ng-click="removerPrestacao(conta.Id)"></i>
                         </button>
                     </td>
                 </tr>
@@ -140,25 +157,26 @@
 
     <div class="form-group">
         <div class="col-md-12" style="text-align: center;">
-            <button class="btn btn-success" ng-if="Solicitacao.Status == 0" data-toggle="tooltip" title="Enviar para Aprovação" ng-click="enviarAprovacao(0)">
+            <button class="btn btn-success" ng-if="(Solicitacao.Status == 0 || Solicitacao.Status == 3) && Solicitacao.Custos.length > 0" data-toggle="tooltip" title="Enviar para Aprovação" ng-click="enviarAprovacao(Solicitacao)">
                 <i class="fa fa-check" aria-hidden="true"></i>
+                <!-- Somente status aberto e aberto para custos -->
                 Enviar para Aprovação
             </button>
-            <button class="btn btn-primary" ng-if="Solicitacao.Status == 0" data-toggle="tooltip" title="Salvar">
+            <button class="btn btn-primary" ng-if="Solicitacao.Status == 0" data-toggle="tooltip" title="Salvar" ng-click="salvarItem(Solicitacao, false)">
                 <i class="fa fa-floppy-o" aria-hidden="true"></i>
                 Salvar
             </button>
-            <button class="btn btn-danger" ng-if="Solicitacao.Status == 0" data-toggle="tooltip" title="Remover" ng-click="removerItem(0)">
+            <button class="btn btn-danger" ng-if="Solicitacao.Status == 0 && Solicitacao.Id >= 0" data-toggle="tooltip" title="Remover" ng-click="removerItem(Solicitacao)">
                 <i class="fa fa-trash" aria-hidden="true"></i>
                 Remover
             </button>
 
-            <button class="btn btn-success" ng-if="Solicitacao.Status == 1 || Solicitacao.Status == 4" data-toggle="tooltip" title="Aprovar">
+            <button class="btn btn-success" ng-if="Solicitacao.Status == 1 || Solicitacao.Status == 4" data-toggle="tooltip" title="Aprovar" ng-click="salvarItem(Solicitacao, true)">
                 <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
                 Aprovar
             </button>
 
-            <button class="btn btn-danger" ng-if="Solicitacao.Status == 1 || Solicitacao.Status == 4" data-toggle="tooltip" title="Reprovar" ng-click="reprovarItem(0)">
+            <button class="btn btn-danger" ng-if="Solicitacao.Status == 1 || Solicitacao.Status == 4" data-toggle="tooltip" title="Reprovar" ng-click="reprovarItem(Solicitacao)">
                 <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
                 Reprovar
             </button>
@@ -203,7 +221,7 @@
             </div>
             <div class="modal-body">
 
-                Você tem certeza que deseja remover o item ""? Esta ação não poderá ser desfeita.
+                Você tem certeza que deseja remover o item "{{Solicitacao.Id}}"? Esta ação não poderá ser desfeita.
 
             </div>
             <div class="modal-footer">

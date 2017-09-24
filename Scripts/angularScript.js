@@ -209,6 +209,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
             Motivo: 0,
             Observacao: '',
             Status: 0, // Status em aberto
+            Justificativa: '',
             Custos: []
         };
     }
@@ -221,6 +222,8 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         $scope.Setores = [];
         $scope.ListaGestores = [];
         $scope.ListaSolicitacoes = [];
+
+        $scope.ufLista = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
     }
 
     Limpar();
@@ -438,29 +441,29 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
 
             if (typeof prestacao == 'undefined' || prestacao == null)
             {
-                toastr.error('Objeto de prestação de conta vazio.');
+                toastr.error('Favor preencher os campos de pestação de conta.');
             }
-            else if (typeof prestacao.categoria == 'undefined' || prestacao.categoria == null)
+            else if (typeof prestacao.Tipo == 'undefined' || prestacao.Tipo == null)
             {
                 toastr.error('Categoria informada é inválida.');
             }
-            else if (typeof prestacao.quantidade == 'undefined' || prestacao.quantidade == null)
+            else if (typeof prestacao.Quantidade == 'undefined' || prestacao.Quantidade == null)
             {
                 toastr.error('Quantidade informada é inválida.');
             }
-            else if (prestacao.quantidade > 10)
+            else if (prestacao.Quantidade > 10)
             {
                 toastr.error('Quantidade não pode passar de 10.');
             }
-            else if (typeof prestacao.valor == 'undefined' || prestacao.valor == null)
+            else if (typeof prestacao.ValorSolicitado == 'undefined' || prestacao.ValorSolicitado == null)
             {
                 toastr.error('Valor informado é inválido.');
             }
             else
             {
                 var obj = angular.copy(prestacao);
-                obj.valor = obj.valor.replace(".", "");
-                obj.valor = obj.valor.replace(",", ".");
+                obj.ValorSolicitado = obj.ValorSolicitado.replace(".", "");
+                obj.ValorSolicitado = obj.ValorSolicitado.replace(",", ".");
     
                 obj.id = $scope.Solicitacao.Custos.length;
     
@@ -491,7 +494,7 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
             var total = 0;
 
             $scope.Solicitacao.Custos.forEach(function (element) {
-                total = total + (parseInt(element.quantidade) * parseFloat(element.valor));
+                total = total + (parseInt(element.Quantidade) * parseFloat(element.ValorSolicitado));
             }, this);
 
             $scope.CustoTotal = total.toFixed(2);
@@ -513,12 +516,139 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
             recuperarTotalPrestacao();
         }
 
+        $scope.salvarItem = function(solicitacao, envioAprovacao)
+        {
+            // Realiza a ação de salvar e enviar para aprovação.
+            if (validarSolicitacao(solicitacao, envioAprovacao))
+            {
+                solicitacao.DataIdaS = solicitacao.DataIda;
+                solicitacao.DataIda = null;
+
+                solicitacao.DataVoltaS = solicitacao.DataVolta;
+                solicitacao.DataVolta = null;
+
+                // Seta o usuário logado como o dono da solicitação.
+                solicitacao.IdUsuario = $scope.usuarioLogado.Id;
+
+                $http({
+                    method: 'POST',
+                    url: caminhoApi + '/solicitacao/salvar',
+                    headers: {
+                        'Content-Type': "application/json; charset=utf-"
+                    },
+                    data: JSON.stringify(solicitacao)
+                }).then(function (response) {
+                        var data = response.data;
+    
+                        console.log(data);
+
+                        if (data.Sucesso) {
+                            
+
+
+                            toastr.success('Solicitação de viagem e prestação de custos' + envioAprovacao ? ' enviados para aprovação.' : ' salvos.' , 'Sucesso!');
+                        } else {
+                            toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao' + (envioAprovacao ? ' enviar para aprovação' : ' salvar') + ', tente novamente.');
+                        }
+                    },
+                    function (response) {
+                        toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao' + (envioAprovacao ? ' enviar para aprovação' : ' salvar') + ', tente novamente.');
+                    });
+            }
+        }
+
         function Limpar()
         {
             if (typeof $scope.Solicitacao == 'undefined' || $scope.Solicitacao == null)
             {
                 $scope.BuscarSolicitacoes();
             }
+        }
+
+        function validarSolicitacao(solicitacao, envioAprovacao)
+        {
+            if (typeof envioAprovacao == 'undefined' || envioAprovacao == null)
+            {
+                envioAprovacao = true;
+            }
+
+            if (typeof solicitacao == 'undefined' || solicitacao == null)
+            {
+                toastr.error('Objeto de solicitação de viagem vazio.');
+                return false;
+            }
+            else if (typeof solicitacao.UfOrigem == 'undefined' || solicitacao.UfOrigem == null || solicitacao.UfOrigem.length == 0)
+            {
+                toastr.error("Campo 'UF Origem' inválido.");
+                return false;
+            }
+            else if (solicitacao.UfOrigem.length > 2)
+            {
+                toastr.error("Campo 'UF Origem' maior que 2 caracteres.");
+                return false;
+            }
+            else if (typeof solicitacao.CidadeOrigem == 'undefined' || solicitacao.CidadeOrigem == null || solicitacao.CidadeOrigem.length == 0)
+            {
+                toastr.error("Campo 'Origem' inválido.");
+                return false;
+            }
+            else if (solicitacao.CidadeOrigem.length > 255)
+            {
+                toastr.error("Campo 'Origem' maior que 255 caracteres.");
+                return false;
+            }
+            else if (typeof solicitacao.UfDestino == 'undefined' || solicitacao.UfDestino == null || solicitacao.UfDestino.length == 0)
+            {
+                toastr.error("Campo 'UF Destino' inválido.");
+                return false;
+            }
+            else if (solicitacao.UfDestino.length > 2)
+            {
+                toastr.error("Campo 'UF Destino' maior que 2 caracteres.");
+                return false;
+            }
+            else if (typeof solicitacao.CidadeDestino == 'undefined' || solicitacao.CidadeDestino == null || solicitacao.CidadeDestino.length == 0)
+            {
+                toastr.error("Campo 'Destino' inválido.");
+                return false;
+            }
+            else if (solicitacao.CidadeDestino.length > 255)
+            {
+                toastr.error("Campo 'Destino' maior que 255 caracteres.");
+                return false;
+            }
+            else if (typeof solicitacao.DataIda == 'undefined' || solicitacao.DataIda == null || solicitacao.DataIda.length == 0)
+            {
+                toastr.error("Campo 'Data Ida' inválido.");
+                return false;
+            }
+            else if (typeof solicitacao.DataVolta == 'undefined' || solicitacao.DataVolta == null || solicitacao.DataVolta.length == 0)
+            {
+                toastr.error("Campo 'Data Volta' inválido.");
+                return false;
+            }
+            else if (typeof solicitacao.Motivo == 'undefined' || solicitacao.Motivo == null || solicitacao.Motivo.length == 0)
+            {
+                toastr.error("Campo 'Motivo' inválido.");
+                return false;
+            }
+            else if (solicitacao.Motivo.length > 255)
+            {
+                toastr.error("Campo 'Motivo' maior que 255 caracteres.");
+                return false;
+            }
+            else if (typeof solicitacao.Observacao != 'undefined' && solicitacao.Observacao != null && solicitacao.Observacao.length > 255)
+            {
+                toastr.error("Campo 'Observação' maior que 255 caracteres.");
+                return false;
+            }
+            else if (envioAprovacao && (typeof solicitacao.Custos == 'undefined' || solicitacao.Custos == null || solicitacao.Custos.length == 0))
+            {
+                toastr.error("Favor informar prestação de custos da viagem.");
+                return false;
+            }
+
+            return true;
         }
 
         Limpar();
