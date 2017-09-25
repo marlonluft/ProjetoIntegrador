@@ -30,8 +30,8 @@ projetoIntegrador.config(function ($routeProvider, $windowProvider, $locationPro
             controller: 'colaboradorController'
         })
         .when('/gestor', {
-            templateUrl: '../Views/gestor/index.html',
-            controller: 'gestorController'
+            templateUrl: '../Views/colaborador/index.html',
+            controller: 'colaboradorController'
         })
         .when('/setor', {
             templateUrl: '../Views/setor/index.html',
@@ -43,7 +43,7 @@ projetoIntegrador.config(function ($routeProvider, $windowProvider, $locationPro
         })
         .when('/solicitarViagem', {
             templateUrl: '../Views/solicitarViagem/index.html',
-            controller: 'colaboradorController'
+            controller: 'solicitacaoController'
         })
         .when('/naoEncontrado', {
             templateUrl: '../Views/Error/naoEncontrado.html',
@@ -98,7 +98,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         $scope.menuSetor = $scope.usuarioLogado.Perfil == 'ADMINISTRADOR' ? '/#!/setor/' : '';
         $scope.menuUsuario = $scope.usuarioLogado.Perfil == 'ADMINISTRADOR' ? '/#!/usuario/' : '';
         $scope.menuColaborador = $scope.usuarioLogado.Perfil == 'COLABORADOR' ? '/#!/colaborador/' : '';
-        $scope.menuSolicitarViagem = $scope.usuarioLogado.Perfil == 'COLABORADOR' ? '/#!/solicitarViagem/' : '';
+        $scope.menuSolicitarViagem = $scope.usuarioLogado.Perfil == 'COLABORADOR' || $scope.usuarioLogado.Perfil == 'GESTOR' ? '/#!/solicitarViagem/' : '';
         $scope.menuSair = $scope.usuarioLogado.Id >= 0 ? "/#!/?sair" : '';
     }
 
@@ -168,7 +168,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
 
     $scope.BuscarSolicitacoes = function () {
 
-        $scope.Solicitacao = null;
+        SolicitacaoSet(null);
 
         $http({
             method: 'POST',
@@ -180,9 +180,15 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         }).then(function (response) {
                 var data = response.data;
 
-                console.log(data);
-
                 if (data.Sucesso) {
+                    for (var i = 0; i < data.Lista.length; i++) {
+                        if (typeof data.Lista[i].Custos != 'undefined' && data.Lista[i].Custos != null) {
+                            for (var x = 0; x < data.Lista[i].Custos.length; x++) {
+                                data.Lista[i].Custos[x].Ordem = x;
+                            }
+                        }
+                    }
+
                     $scope.ListaSolicitacoes = data.Lista;
                 } else {
                     toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de solicitações, tente novamente.');
@@ -194,36 +200,6 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
     }
     /* FIM Funções de pesquisa compartilhadas */
 
-    /* Outras funções compartilhadas */
-    $scope.LimparSolicitacao = function(model)
-    {
-        if (model == null)
-        {
-            $scope.Solicitacao = {
-                Id: -1,
-                IdUsuario: $scope.usuarioLogado.Id,
-                CidadeOrigem: '',
-                UfOrigem: '',
-                CidadeDestino: '',
-                UfDestino: '',
-                DataIda: '',
-                DataVolta: '',
-                Motivo: 0,
-                Observacao: '',
-                Status: 0, // Status em aberto
-                Justificativa: '',
-                Custos: []
-            };
-        }
-        else
-        {
-            $scope.Solicitacao = angular.copy(model);
-            $scope.Solicitacao.DataIda = new Date(parseInt($scope.Solicitacao.DataIda));
-            $scope.Solicitacao.DataVolta = new Date(parseInt($scope.Solicitacao.DataVolta));
-        }
-    }
-    /* FIM Outras funções compartilhadas */
-
     function Limpar() {
         $scope.LimparUsuarioLogado();
 
@@ -231,9 +207,10 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         $scope.Setores = [];
         $scope.ListaGestores = [];
         $scope.ListaSolicitacoes = [];
-
-        $scope.Solicitacao = null;
-        $scope.ufLista = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
+        
+        window.localStorage.setItem('PerfilGestor', 0);
+        $scope.ufLista = ['AC', 'AL', 'AM', 'AP', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MG', 'MS', 'MT', 'PA', 'PB', 'PE', 'PI', 'PR', 'RJ', 'RN', 'RO', 'RR', 'RS', 'SC', 'SE', 'SP', 'TO'];
+        window.localStorage.setItem('Solicitacao', null);
     }
 
     Limpar();
@@ -291,6 +268,7 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                         }
 
                         $scope.LimparUsuarioLogado(data);
+                        window.localStorage.setItem('PerfilGestor', 0);
 
                         switch (data.Perfil) {
 
@@ -301,6 +279,7 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
 
                                 // Gestor
                             case 'GESTOR':
+                                window.localStorage.setItem('PerfilGestor', 1);
                                 $window.location.href = $scope.menuGestor;
                                 break;
 
@@ -364,167 +343,52 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
     });
 });
 
-projetoIntegrador.controller('colaboradorController', function ($scope, $window, $http, toastr) {
-
+projetoIntegrador.controller('solicitacaoController', function ($scope, $window, $http, toastr, $timeout) {
     if ($scope.ValidarLogin()) {
 
-        $scope.AbrirSolicitacao = function (model) {
-            $scope.Solicitacao = angular.copy(model);
-            $window.location.href = $scope.menuSolicitarViagem;         
-        }
-
+        /* Variáveis */
         $scope.categorias = [{
-                text: 'Passagem',
-                value: 0
-            },
-            {
-                text: 'Hospedagem',
-                value: 1
-            },
-            {
-                text: 'Alimentação',
-                value: 2
-            },
-            {
-                text: 'Transporte',
-                value: 3
-            },
-            {
-                text: 'Outro',
-                value: 4
-            }
-        ];
+            text: 'Passagem',
+            value: 0
+        }, {
+            text: 'Hospedagem',
+            value: 1
+        }, {
+            text: 'Alimentação',
+            value: 2
+        }, {
+            text: 'Transporte',
+            value: 3
+        }, {
+            text: 'Outro',
+            value: 4
+        }];
 
-        $scope.status = [{
-                text: 'Em Aberto',
-                value: 0
-            },
-            {
-                text: 'Aguardando Aprovação de Viagem',
-                value: 1
-            },
-            {
-                text: 'Solicitação Recusada',
-                value: 2
-            },
-            {
-                text: 'Em Aberto Prestação de Contas',
-                value: 3
-            },
-            {
-                text: 'Aguardando Aprovação de Contas',
-                value: 4
-            },
-            {
-                text: 'Prestação Recusada',
-                value: 5
-            },
-            {
-                text: 'Finalizado',
-                value: 6
-            }
-        ];
-
-        $scope.removerItem = function (model) {
-            $scope.Solicitacao = angular.copy(model);
-            $('#modalRemover').modal('show');
-        }
-
-        $scope.reprovarItem = function (model) {
-            $scope.Solicitacao = angular.copy(model);
+        /* Métodos */
+        $scope.reprovarSolicitacao = function (model) {
             $('#modalReprovar').modal('show');
         }
 
+        $scope.removerSolicitacao = function (model) {
+            $('#modalRemover').modal('show');
+        }
+
         $scope.enviarAprovacao = function (model) {
-            $scope.Solicitacao = angular.copy(model);
             $('#modalEnviarAprovacao').modal('show');
         }
+        
+        $scope.enviarSalvar = function (status) {
 
-        $scope.adicionarPrestacaoConta = function (prestacao) {
+            /* status define o status a ser setado para a solicitação de viagem
+                0 = EmAberto,
+                1 = AGUARDANDO_APROVACAO_VIAGEM,
+                2 = (Aprovar)EM_ABERTO_CONTAS - FINALIZADO,
+                3 = (Reprovar)RECUSADO_VIAGEM - RECUSADO_CONTAS,
+                4 = AGUARDANDO_APROVACAO_CONTAS*/
 
-            if (typeof prestacao == 'undefined' || prestacao == null)
-            {
-                toastr.error('Favor preencher os campos de pestação de conta.');
-            }
-            else if (typeof prestacao.Tipo == 'undefined' || prestacao.Tipo == null)
-            {
-                toastr.error('Categoria informada é inválida.');
-            }
-            else if (typeof prestacao.Quantidade == 'undefined' || prestacao.Quantidade == null)
-            {
-                toastr.error('Quantidade informada é inválida.');
-            }
-            else if (prestacao.Quantidade > 10)
-            {
-                toastr.error('Quantidade não pode passar de 10.');
-            }
-            else if (typeof prestacao.ValorSolicitado == 'undefined' || prestacao.ValorSolicitado == null)
-            {
-                toastr.error('Valor informado é inválido.');
-            }
-            else
-            {
-                var obj = angular.copy(prestacao);
-                obj.ValorSolicitado = obj.ValorSolicitado.replace(".", "");
-                obj.ValorSolicitado = obj.ValorSolicitado.replace(",", ".");
-    
-                obj.id = $scope.Solicitacao.Custos.length;
-    
-                $scope.Solicitacao.Custos.push(obj);
-    
-                recuperarTotalPrestacao();
-            }           
-        }
-
-        $scope.recupearDescricao = function (value) {
-            var obj = $scope.categorias[Object.keys($scope.categorias).find(x => $scope.categorias[x].value === value)];
-            return obj.text;
-        }
-
-        $scope.recupearDescricaoStatus = function (value) {
-            try{
-                var obj = $scope.status[Object.keys($scope.status).find(x => $scope.status[x].value === value)];
-                return obj.text;
-            }
-            catch(ex)
-            {
-                toastr.error('Falha ao recuperar o status da solicitação');
-                return "";
-            }
-        }
-
-        function recuperarTotalPrestacao() {
-            var total = 0;
-
-            $scope.Solicitacao.Custos.forEach(function (element) {
-                total = total + (parseInt(element.Quantidade) * parseFloat(element.ValorSolicitado));
-            }, this);
-
-            $scope.CustoTotal = total.toFixed(2);
-
-            setTimeout(function ()
-            {
-                $('#txtValorTotal').mask("#.###.###.##0,00", {reverse: true});
-            }, 500);
-        }
-
-        $scope.removerPrestacao = function (id) {
-            for (var i = $scope.Solicitacao.Custos.length - 1; i >= 0; i--) {
-                if ($scope.Solicitacao.Custos[i].id == id) {
-                    $scope.Solicitacao.Custos.splice(i, 1);
-                    break;
-                }
-            }
-
-            recuperarTotalPrestacao();
-        }
-
-        $scope.salvarItem = function(solicitacao, envioAprovacao)
-        {
             // Realiza a ação de salvar e enviar para aprovação.
-            if (validarSolicitacao(solicitacao, envioAprovacao))
-            {
-                var solViagem = angular.copy(solicitacao);
+            if (validarSolicitacao($scope.Solicitacao, status > 0)) {
+                var solViagem = angular.copy($scope.Solicitacao);
 
                 solViagem.DataIdaS = solViagem.DataIda;
                 solViagem.DataIda = null;
@@ -532,13 +396,58 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
                 solViagem.DataVoltaS = solViagem.DataVolta;
                 solViagem.DataVolta = null;
 
-                for (var i = 0; i < solViagem.Custos.length; i++)
-                {
-                    solViagem.Custos[i].Tipo = $scope.recupearDescricao(solViagem.Custos[i].Tipo);                    
+                for (var i = 0; i < solViagem.Custos.length; i++) {
+                    if (typeof solViagem.Custos[i].Id == 'undefined' || solViagem.Custos[i].Id < 0)                    
+                    {
+                        solViagem.Custos[i].TipoI = solViagem.Custos[i].Tipo;
+                    }                    
                 }
 
-                // Seta o usuário logado como o dono da solicitação.
-                solViagem.IdUsuario = $scope.usuarioLogado.Id;
+
+                solViagem.EnviarAprovacao = false;
+                solViagem.Aprovado = false;
+                solViagem.AprovadoCustos = false;
+                solViagem.Reprovado = false;
+                solViagem.ReprovadoCustos = false;
+                solViagem.EnviarAprovacaoCustos = false;
+
+                switch (status)
+                {
+                    case 0:
+                        // Seta o usuário logado como o dono da solicitação.
+                        solViagem.IdUsuario = $scope.usuarioLogado.Id;
+                        break;
+                    case 1:
+                        solViagem.EnviarAprovacao = true;
+                        break;
+                    case 2:
+                        if (solViagem.Status == 1)
+                        {
+                            // EM_ABERTO_CONTAS
+                            solViagem.Aprovado = true;
+                        }
+                        else
+                        {
+                            // FINALIZADO
+                            solViagem.AprovadoCustos = true;
+                        }
+                        break;
+                    case 3:
+                        if (solViagem.Status == 1)
+                        {
+                            // RECUSADO_VIAGEM
+                            solViagem.Reprovado = true;
+                        }
+                        else
+                        {
+                            // RECUSADO_CONTAS
+                            solViagem.ReprovadoCustos = true;
+                        }
+                        break;
+                    case 4:
+                        solViagem.EnviarAprovacaoCustos = true;
+                        break;
+                }
 
                 $http({
                     method: 'POST',
@@ -549,36 +458,144 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
                     data: JSON.stringify(solViagem)
                 }).then(function (response) {
                         var data = response.data;
-    
-                        console.log(data);
 
                         if (data.Sucesso) {
-                            
-                            toastr.success('Solicitação de viagem e prestação de custos' + envioAprovacao ? ' enviados para aprovação.' : ' salvos.' , 'Sucesso!');
+
+                            var msg = '';
+                            switch (status)
+                            {
+                                case 0:
+                                    msg = 'Solicitação de viagem e prestação de custos salvos com sucesso!';
+                                    break;
+                                case 1:
+                                    msg = 'Solicitação de viagem enviada para aprovação!';
+                                    break;
+                                case 2:
+                                    if (solViagem.Status == 1)
+                                    {
+                                        msg = 'Solicitação de viagem aprovada com sucesso!';
+                                    }
+                                    else
+                                    {
+                                        msg = 'Prestação de custos aprovados com sucesso!';
+                                    }
+                                    break;
+                                case 3:
+                                    if (solViagem.Status == 1)
+                                    {
+                                        msg = 'Solicitação de viagem recusada com sucesso!';
+                                    }
+                                    else
+                                    {
+                                        msg = 'Prestação de custos recusados com sucesso!';
+                                    }
+                                    break;
+                                case 4:
+                                    msg = 'Prestação de custos enviados para aprovação!';
+                                    break;
+                            }
+
+                            toastr.success(msg);
+                            $scope.BuscarSolicitacoes();
+                            $window.location.href = $scope.menuColaborador;                            
                         } else {
-                            toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao' + (envioAprovacao ? ' enviar para aprovação' : ' salvar') + ', tente novamente.');
+                            toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao realizar a ação, tente novamente.');
                         }
                     },
                     function (response) {
-                        toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao' + (envioAprovacao ? ' enviar para aprovação' : ' salvar') + ', tente novamente.');
+                        toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao realizar a ação, tente novamente.');
                     });
             }
         }
 
-        $scope.confirmarRemoverSolicitacao = function(id)
-        {
+        $scope.adicionarPrestacaoConta = function (prestacao) {
+
+            if (typeof prestacao == 'undefined' || prestacao == null) {
+                toastr.error('Favor preencher os campos de pestação de conta.');
+            } else if (typeof prestacao.Tipo == 'undefined' || prestacao.Tipo == null) {
+                toastr.error('Categoria informada é inválida.');
+            } else if (typeof prestacao.Quantidade == 'undefined' || prestacao.Quantidade == null) {
+                toastr.error('Quantidade informada é inválida.');
+            } else if (prestacao.Quantidade > 10) {
+                toastr.error('Quantidade não pode passar de 10.');
+            } else if (typeof prestacao.ValorSolicitado == 'undefined' || prestacao.ValorSolicitado == null) {
+                toastr.error('Valor informado é inválido.');
+            } else {
+                var obj = angular.copy(prestacao);
+                obj.ValorSolicitado = obj.ValorSolicitado.replace(".", "");
+                obj.ValorSolicitado = obj.ValorSolicitado.replace(",", ".");
+
+                obj.Id = -1;
+                obj.TipoI = obj.Tipo;
+
+                if ($scope.Solicitacao.Custos.length > 0) {
+                    obj.Ordem = $scope.Solicitacao.Custos[$scope.Solicitacao.Custos.length - 1].Ordem + 1;
+                } else {
+                    obj.Ordem = $scope.Solicitacao.Custos.length;
+                }
+
+                $scope.Solicitacao.Custos.push(obj);
+
+                recuperarTotalPrestacaoContas();
+            }
+        }
+
+        $scope.recupearDescricaoCategoria = function (value) {
+            var obj = $scope.categorias[Object.keys($scope.categorias).find(x => $scope.categorias[x].value === value)];
+            return obj.text;
+        }
+
+        function recuperarTotalPrestacaoContas() {
+            var total = 0;
+
+            $scope.Solicitacao.Custos.forEach(function (element) {
+                total = total + (parseInt(element.Quantidade) * parseFloat(element.ValorSolicitado));
+            }, this);
+
+            $scope.CustoTotal = total.toFixed(2);
+
+            $timeout(function () {
+                $('#txtValorTotal').mask("#.###.###.##0,00", {
+                    reverse: true
+                });
+            }, 1);
+        }
+
+        $scope.confirmarRemoverPrestacaoConta = function () {
+
+            $('#modalRemoverConta').modal('hide');
+
+            for (var i = $scope.Solicitacao.Custos.length - 1; i >= 0; i--) {
+                if ($scope.Solicitacao.Custos[i].Ordem == $scope.ordemPrestacaoContaRemover) {
+                    $scope.Solicitacao.Custos.splice(i, 1);
+                    break;
+                }
+            }
+
+            recuperarTotalPrestacaoContas();
+        }
+
+        $scope.removerPrestacaoConta = function (ordem) {
+            $scope.ordemPrestacaoContaRemover = ordem;
+            $('#modalRemoverConta').modal('show');
+        }
+
+        $scope.confirmarRemoverSolicitacao = function () {
             $http({
                 method: 'POST',
                 url: caminhoApi + '/solicitacao/remover',
-                data: JSON.stringify(id.toString()),
+                data: JSON.stringify($scope.Solicitacao.Id.toString()),
                 headers: {
                     'Content-Type': "application/json; charset=utf-8"
                 }
             }).then(function (response) {
                     var data = response.data;
-    
+
                     if (data.Sucesso) {
-                        toastr.success('Solicitação de viagem removida com sucesso' , 'Sucesso!');
+                        toastr.success('Solicitação de viagem removida com sucesso', 'Sucesso!');
+
+                        $('#modalRemover').modal('hide');
+                        $scope.BuscarSolicitacoes();
                         $window.location.href = $scope.menuColaborador;
                     } else {
                         toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover a solicitação de viagem, tente novamente.');
@@ -589,93 +606,54 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
                 });
         }
 
-        function Limpar()
-        {
-            if (typeof $scope.Solicitacao == 'undefined' || $scope.Solicitacao == null)
-            {
-                $scope.BuscarSolicitacoes();
-            }
-        }
-
-        function validarSolicitacao(solicitacao, envioAprovacao)
-        {
-            if (typeof envioAprovacao == 'undefined' || envioAprovacao == null)
-            {
+        function validarSolicitacao(solicitacao, envioAprovacao) {
+            if (typeof envioAprovacao == 'undefined' || envioAprovacao == null) {
                 envioAprovacao = true;
             }
 
-            if (typeof solicitacao == 'undefined' || solicitacao == null)
-            {
+            if (typeof solicitacao == 'undefined' || solicitacao == null) {
                 toastr.error('Objeto de solicitação de viagem vazio.');
                 return false;
-            }
-            else if (typeof solicitacao.UfOrigem == 'undefined' || solicitacao.UfOrigem == null || solicitacao.UfOrigem.length == 0)
-            {
+            } else if (typeof solicitacao.UfOrigem == 'undefined' || solicitacao.UfOrigem == null || solicitacao.UfOrigem.length == 0) {
                 toastr.error("Campo 'UF Origem' inválido.");
                 return false;
-            }
-            else if (solicitacao.UfOrigem.length > 2)
-            {
+            } else if (solicitacao.UfOrigem.length > 2) {
                 toastr.error("Campo 'UF Origem' maior que 2 caracteres.");
                 return false;
-            }
-            else if (typeof solicitacao.CidadeOrigem == 'undefined' || solicitacao.CidadeOrigem == null || solicitacao.CidadeOrigem.length == 0)
-            {
+            } else if (typeof solicitacao.CidadeOrigem == 'undefined' || solicitacao.CidadeOrigem == null || solicitacao.CidadeOrigem.length == 0) {
                 toastr.error("Campo 'Origem' inválido.");
                 return false;
-            }
-            else if (solicitacao.CidadeOrigem.length > 255)
-            {
+            } else if (solicitacao.CidadeOrigem.length > 255) {
                 toastr.error("Campo 'Origem' maior que 255 caracteres.");
                 return false;
-            }
-            else if (typeof solicitacao.UfDestino == 'undefined' || solicitacao.UfDestino == null || solicitacao.UfDestino.length == 0)
-            {
+            } else if (typeof solicitacao.UfDestino == 'undefined' || solicitacao.UfDestino == null || solicitacao.UfDestino.length == 0) {
                 toastr.error("Campo 'UF Destino' inválido.");
                 return false;
-            }
-            else if (solicitacao.UfDestino.length > 2)
-            {
+            } else if (solicitacao.UfDestino.length > 2) {
                 toastr.error("Campo 'UF Destino' maior que 2 caracteres.");
                 return false;
-            }
-            else if (typeof solicitacao.CidadeDestino == 'undefined' || solicitacao.CidadeDestino == null || solicitacao.CidadeDestino.length == 0)
-            {
+            } else if (typeof solicitacao.CidadeDestino == 'undefined' || solicitacao.CidadeDestino == null || solicitacao.CidadeDestino.length == 0) {
                 toastr.error("Campo 'Destino' inválido.");
                 return false;
-            }
-            else if (solicitacao.CidadeDestino.length > 255)
-            {
+            } else if (solicitacao.CidadeDestino.length > 255) {
                 toastr.error("Campo 'Destino' maior que 255 caracteres.");
                 return false;
-            }
-            else if (typeof solicitacao.DataIda == 'undefined' || solicitacao.DataIda == null || solicitacao.DataIda.length == 0)
-            {
+            } else if (typeof solicitacao.DataIda == 'undefined' || solicitacao.DataIda == null || solicitacao.DataIda.length == 0) {
                 toastr.error("Campo 'Data Ida' inválido.");
                 return false;
-            }
-            else if (typeof solicitacao.DataVolta == 'undefined' || solicitacao.DataVolta == null || solicitacao.DataVolta.length == 0)
-            {
+            } else if (typeof solicitacao.DataVolta == 'undefined' || solicitacao.DataVolta == null || solicitacao.DataVolta.length == 0) {
                 toastr.error("Campo 'Data Volta' inválido.");
                 return false;
-            }
-            else if (typeof solicitacao.Motivo == 'undefined' || solicitacao.Motivo == null || solicitacao.Motivo.length == 0)
-            {
+            } else if (typeof solicitacao.Motivo == 'undefined' || solicitacao.Motivo == null || solicitacao.Motivo.length == 0) {
                 toastr.error("Campo 'Motivo' inválido.");
                 return false;
-            }
-            else if (solicitacao.Motivo.length > 255)
-            {
+            } else if (solicitacao.Motivo.length > 255) {
                 toastr.error("Campo 'Motivo' maior que 255 caracteres.");
                 return false;
-            }
-            else if (typeof solicitacao.Observacao != 'undefined' && solicitacao.Observacao != null && solicitacao.Observacao.length > 255)
-            {
+            } else if (typeof solicitacao.Observacao != 'undefined' && solicitacao.Observacao != null && solicitacao.Observacao.length > 255) {
                 toastr.error("Campo 'Observação' maior que 255 caracteres.");
                 return false;
-            }
-            else if (envioAprovacao && (typeof solicitacao.Custos == 'undefined' || solicitacao.Custos == null || solicitacao.Custos.length == 0))
-            {
+            } else if (envioAprovacao && (typeof solicitacao.Custos == 'undefined' || solicitacao.Custos == null || solicitacao.Custos.length == 0)) {
                 toastr.error("Favor informar prestação de custos da viagem.");
                 return false;
             }
@@ -683,22 +661,181 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
             return true;
         }
 
-        Limpar();
-
         $(document).ready(function () {
-            $('#txtValor').mask("#.##0,00", {reverse: true});
-            $('#txtQuantidade').mask("00", {reverse: true});
+            $('#txtValor').mask("#.##0,00", {
+                reverse: true
+            });
+            $('#txtQuantidade').mask("00", {
+                reverse: true
+            });
         });
+
+        function Limpar() {
+            $scope.Solicitacao = angular.copy(SolicitacaoGet());
+            recuperarTotalPrestacaoContas();
+
+            $scope.EditarViagem = false;
+            $scope.EditarContas = false;
+            $scope.PerfilGestor = window.localStorage.getItem('PerfilGestor') == 1;
+
+            switch ($scope.Solicitacao.Status)
+            {
+                case 3:
+                    if (!$scope.PerfilGestor)
+                    {
+                        // Somente colaborador
+                        $scope.EditarContas = true;
+                    }                    
+                    break;
+                default:
+                case 0:
+                    if (typeof $scope.Solicitacao.Status == 'undefined' || $scope.Solicitacao.Status == null || $scope.Solicitacao.Status == 0)
+                    {
+                        $scope.EditarViagem = true;
+                        $scope.EditarContas = true;
+                    }                    
+                    break;
+            }
+        }
+
+        Limpar();
     }
 });
 
-projetoIntegrador.controller('gestorController', function ($scope, $http, toastr) {
+projetoIntegrador.controller('colaboradorController', function ($scope, $window, $http, toastr, ) {
 
     if ($scope.ValidarLogin()) {
 
-        $scope.reprovarItem = function (id) {
+        /* Variáveis */
+        $scope.status = [{
+            text: 'Em Aberto',
+            value: 0
+        }, {
+            text: 'Aguardando Aprovação de Viagem',
+            value: 1
+        }, {
+            text: 'Solicitação Recusada',
+            value: 2
+        }, {
+            text: 'Em Aberto Prestação de Contas',
+            value: 3
+        }, {
+            text: 'Aguardando Aprovação de Contas',
+            value: 4
+        }, {
+            text: 'Prestação Recusada',
+            value: 5
+        }, {
+            text: 'Finalizado',
+            value: 6
+        }];
+
+        /* Métodos */
+        $scope.AbrirSolicitacao = function (model) {
+            SolicitacaoSet(angular.copy(model));
+            $window.location.href = $scope.menuSolicitarViagem;
+        }
+
+        $scope.removerSolicitacao = function (model) {
+            SolicitacaoSet(angular.copy(model));
+            $('#modalRemover').modal('show');
+        }
+
+        $scope.recupearDescricaoStatus = function (value) {
+            try {
+                var obj = $scope.status[Object.keys($scope.status).find(x => $scope.status[x].value === value)];
+                return obj.text;
+            } catch (ex) {
+                toastr.error('Falha ao recuperar o status da solicitação');
+                return "";
+            }
+        }
+
+        $scope.confirmarRemoverSolicitacao = function()
+        {
+            var solicitacaoObj = SolicitacaoGet();
+
+            $http({
+                method: 'POST',
+                url: caminhoApi + '/solicitacao/remover',
+                data: JSON.stringify(solicitacaoObj.Id.toString()),
+                headers: {
+                    'Content-Type': "application/json; charset=utf-8"
+                }
+            }).then(function (response) {
+                    var data = response.data;
+
+                    if (data.Sucesso) {
+                        toastr.success('Solicitação de viagem removida com sucesso', 'Sucesso!');
+
+                        $('#modalRemover').modal('hide');
+                        $scope.BuscarSolicitacoes();
+                    } else {
+                        toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover a solicitação de viagem, tente novamente.');
+                    }
+                },
+                function (response) {
+                    toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao remover a solicitação de viagem, tente novamente.');
+                });
+        }
+
+        $scope.LimparSolicitacao = function (model) {
+            if (model == null) {
+                SolicitacaoSet({
+                    Id: -1,
+                    IdUsuario: $scope.usuarioLogado.Id,
+                    CidadeOrigem: '',
+                    UfOrigem: '',
+                    CidadeDestino: '',
+                    UfDestino: '',
+                    DataIda: new Date(),
+                    DataVolta: new Date(),
+                    Motivo: 0,
+                    Observacao: '',
+                    Status: 0, // Status em aberto
+                    Justificativa: '',
+                    Custos: []
+                });
+            } else {
+                var solicitacao = angular.copy(model);
+                solicitacao.DataIda = new Date(parseInt(solicitacao.DataIda));
+                solicitacao.DataVolta = new Date(parseInt(solicitacao.DataVolta));
+                SolicitacaoSet(solicitacao);
+            }
+        }
+
+        $scope.reprovarSolicitacaoViagem = function () {
+            $scope.Solicitacao = angular.copy(SolicitacaoGet());
             $('#modalReprovar').modal('show');
         }
+
+        $scope.confirmarReprovarSolicitacaoViagem = function () {
+            
+            if (typeof $scope.Solicitacao.Justificativa == 'undefined' || $scope.Solicitacao.Justificativa == null || $scope.Solicitacao.Justificativa.length <= 0)
+            {
+                toastr.error('Favor informar uma justificativa.');                
+            }
+            else
+            {
+                $('#modalReprovar').modal('hide');
+            }
+        }
+
+        $scope.aprovarSolicitacaoViagem = function () {
+            $('#modalAprovar').modal('show');
+        }
+
+        $scope.confirmarAprovarSolicitacaoViagem = function () {
+            $scope.Solicitacao = angular.copy(SolicitacaoGet());
+            $('#modalAprovar').modal('hide');
+        }
+
+        function Limpar() {
+            $scope.PerfilGestor = window.localStorage.getItem('PerfilGestor') == 1;
+            $scope.BuscarSolicitacoes();            
+        }
+
+        Limpar();
     }
 });
 

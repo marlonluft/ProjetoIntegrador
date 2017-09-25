@@ -1,4 +1,4 @@
-<button class="btn btn-default" ng-click="LimparSolicitacao(null); AbrirSolicitacao(Solicitacao);">Solicitar Viagem</button>
+<button class="btn btn-default" ng-if="!PerfilGestor" ng-click="LimparSolicitacao(null); AbrirSolicitacao(Solicitacao);">Solicitar Viagem</button>
 
 <br/><br/>
 
@@ -9,7 +9,6 @@
 <div id="myTabContent" class="tab-content">
 
     <div class="tab-pane fade active in" id="viagem">
-
         <div class="table-responsive">
             <table class="table table-striped table-hover ">
                 <thead>
@@ -38,19 +37,32 @@
                 <tbody>
                     <tr ng-repeat="item in ListaSolicitacoes | filter:{Status: '!3'}">
                         <td ng-bind="item.Id"></td>
-                        <td ng-bind="item.CidadeOrigem"></td>
-                        <td ng-bind="item.CidadeDestino"></td>
+                        <td ng-bind="item.CidadeOrigem + '-' + item.UfOrigem"></td>
+                        <td ng-bind="item.CidadeDestino + '-' + item.UfDestino"></td>
                         <td ng-bind="item.DataIda | date: 'dd/MM/yyyy'"></td>
                         <td ng-bind="item.DataVolta | date: 'dd/MM/yyyy'"></td>
                         <td ng-bind="recupearDescricaoStatus(item.Status)"></td>
                         <td>
-                            <button ng-if="item.Status == 0" class="btn btn-primary btn-sm" data-toggle="tooltip" title="Editar" ng-click="LimparSolicitacao(item); AbrirSolicitacao(Solicitacao);">
+                            <!-- Colaborador -->
+                            <button ng-if="item.Status == 0 && !PerfilGestor" class="btn btn-primary btn-sm" data-toggle="tooltip" title="Editar" ng-click="LimparSolicitacao(item); AbrirSolicitacao(Solicitacao);">
                                 <i class="fa fa-pencil" aria-hidden="true"></i>
                             </button>
-                            <button ng-if="item.Status == 0" class="btn btn-danger btn-sm" data-toggle="tooltip" title="Excluir" ng-click="removerItem(item)">
+                            <button ng-if="item.Status == 0 && !PerfilGestor" class="btn btn-danger btn-sm" data-toggle="tooltip" title="Excluir" ng-click="removerSolicitacao(item)">
                                 <i class="fa fa-trash" aria-hidden="true"></i>
                             </button>
-                            <button ng-if="item.Status != 0" class="btn btn-default btn-sm" data-toggle="tooltip" title="Visualizar" ng-click="AbrirSolicitacao(item)">
+
+                            <!-- Gestr -->
+                            <button ng-if="(item.Status == 1 || item.Status == 4) && PerfilGestor" class="btn btn-success btn-sm" data-toggle="tooltip"
+                                title="Aprovar" ng-click="LimparSolicitacao(item); aprovarSolicitacaoViagem()">
+                                <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                            </button>
+                            <button ng-if="(item.Status == 1 || item.Status == 4) && PerfilGestor" class="btn btn-danger btn-sm" data-toggle="tooltip"
+                                title="Reprovar" ng-click="LimparSolicitacao(item); reprovarSolicitacaoViagem()">
+                                <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+                            </button>
+
+                            <!-- Todos -->
+                            <button class="btn btn-default btn-sm" data-toggle="tooltip" title="Visualizar" ng-click="AbrirSolicitacao(item)">
                                 <i class="fa fa-eye" aria-hidden="true"></i>
                             </button>
                         </td>
@@ -111,13 +123,58 @@
             </div>
             <div class="modal-body">
 
-                Você tem certeza que deseja remover o item "{{Solicitacao.Id}}"? Esta ação não poderá ser desfeita.
+                Você tem certeza que deseja esta solicitação de viagem? Esta ação não poderá ser desfeita.
 
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" ng-click="confirmarRemoverSolicitacao(Solicitacao.Id)">Remover</button>
+                <button type="button" class="btn btn-danger" ng-click="confirmarRemoverSolicitacao()">Remover</button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- MODAL REPROVAR -->
+<div id="modalReprovar" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Reprovar</h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="form-group">
+                    <label class="control-label" for="txtMotivo">Digite o motivo da reprovação:</label>
+                    <textarea class="form-control" style="min-width: 100%; height: 100px;" rows="5" ng-model="Solicitacao.Justificativa" id="txtMotivo"></textarea>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" ng-click="confirmarReprovarSolicitacaoViagem()">Reprovar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL Aprovar -->
+<div id="modalAprovar" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Aprovar</h4>
+                </div>
+                <div class="modal-body">
+                        
+                Você tem certeza que deseja aprovar esta solicitação de viagem? Esta ação não poderá ser desfeita.
+                        
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" ng-click="confirmarAprovarSolicitacaoViagem()">Aprovar</button>
+                </div>
+            </div>
+        </div>
+    </div>
