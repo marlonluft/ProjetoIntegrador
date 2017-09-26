@@ -8,7 +8,7 @@
         </div>
     </div>
 
-    <div class="panel panel-danger" ng-if="Solicitacao.Justificativa.length > 0 && Solicitacao.status == 2">
+    <div class="panel panel-danger" ng-if="Solicitacao.Justificativa.length > 0 && Solicitacao.Status == 2">
         <div class="panel-heading">
             <h3 class="panel-title">Justificativa Reprovação</h3>
         </div>
@@ -89,7 +89,7 @@
         </div>
     </div>
 
-    <div class="panel panel-danger" ng-if="Solicitacao.Justificativa.length > 0 && Solicitacao.status == 5">
+    <div class="panel panel-danger" ng-if="Solicitacao.Justificativa.length > 0 && Solicitacao.Status == 5">
         <div class="panel-heading">
             <h3 class="panel-title">Justificativa Reprovação</h3>
         </div>
@@ -155,12 +155,12 @@
             </tbody>
         </table>
     </div>
-    <div class="form-group">
+    <div class="form-group">        
         <div class="col-md-12" style="text-align: center;">
             <button class="btn btn-success" ng-if="(Solicitacao.Status == 0 || Solicitacao.Status == 3) && Solicitacao.Custos.length > 0" data-toggle="tooltip" title="Enviar para Aprovação" ng-click="enviarAprovacao(Solicitacao)">
                 <i class="fa fa-check" aria-hidden="true"></i>
                 <!-- Somente status aberto e aberto para custos -->
-                Enviar para Aprovação
+                Enviar para Aprovação {{Solicitacao.Status == 3 ? 'de Custos' : ''}}
             </button>
             <button class="btn btn-primary" ng-if="!PerfilGestor && (Solicitacao.Status == 0)" data-toggle="tooltip" title="Salvar" ng-click="enviarSalvar(0)">
                 <i class="fa fa-floppy-o" aria-hidden="true"></i>
@@ -199,13 +199,13 @@
 
                 <div class="form-group">
                     <label class="control-label" for="txtMotivo">Digite o motivo da reprovação:</label>
-                    <textarea class="form-control" style="min-width: 100%; height: 100px;" rows="5" id="txtMotivo"></textarea>
+                    <textarea class="form-control" style="min-width: 100%; height: 100px;" ng-model="Solicitacao.Justificativa" rows="5" id="txtMotivo"></textarea>
                 </div>
 
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" ng-click="enviarSalvar(3)">Reprovar</button>
+                <button type="button" class="btn btn-danger" ng-click="confirmarReprovarSolicitacaoViagem()">Reprovar</button>
             </div>
         </div>
     </div>
@@ -268,7 +268,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" ng-click="enviarSalvar(1)">Enviar</button>
+                <button type="button" class="btn btn-success" ng-click="enviarSalvar(2)">Enviar</button>
             </div>
         </div>
     </div>

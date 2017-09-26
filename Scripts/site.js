@@ -8,6 +8,8 @@ $(document).on('click','.navbar-collapse.in',function(e) {
     }
 });
 
+/* Solicitação */
+
 function SolicitacaoSet(model)
 {
     if (typeof model !== 'undefined')
@@ -42,6 +44,25 @@ function SolicitacaoGet()
                 obj.DataVolta = '';// new Date();
             }
     }
+
+    return obj;
+}
+
+/* LOGIN */
+
+function LoginSet(model)
+{
+    if (typeof model !== 'undefined')
+    {
+        var obj = JSON.stringify(model);
+        window.localStorage.setItem('CTMLogin', obj);
+    }    
+}
+
+function LoginGet()
+{
+    var obj = window.localStorage.getItem('CTMLogin');
+    obj = JSON.parse(obj);
 
     return obj;
 }
