@@ -98,7 +98,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         $scope.menuGestor = $scope.usuarioLogado.Perfil == 'GESTOR' ? '/#!/gestor/' : '';
         $scope.menuSetor = $scope.usuarioLogado.Perfil == 'ADMINISTRADOR' ? '/#!/setor/' : '';
         $scope.menuUsuario = $scope.usuarioLogado.Perfil == 'ADMINISTRADOR' ? '/#!/usuario/' : '';
-        $scope.menuColaborador = $scope.usuarioLogado.Perfil == 'COLABORADOR' ? '/#!/colaborador/' : '';
+        $scope.menuColaborador = $scope.usuarioLogado.Perfil == 'COLABORADOR' || $scope.usuarioLogado.Perfil == 'GESTOR' ? '/#!/colaborador/' : '';
         $scope.menuSolicitarViagem = $scope.usuarioLogado.Perfil == 'COLABORADOR' || $scope.usuarioLogado.Perfil == 'GESTOR' ? '/#!/solicitarViagem/' : '';
         $scope.menuSair = $scope.usuarioLogado.Id >= 0 ? "/#!/?sair" : '';
     }
@@ -219,6 +219,203 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
             });
     }
     /* FIM Funções de pesquisa compartilhadas */
+
+    $scope.SalvarSolicitacao = function (solicitacao, status) {
+        
+                    /* status define o status a ser setado para a solicitação de viagem
+                        0 = EmAberto,
+                        1 = AGUARDANDO_APROVACAO_VIAGEM,
+                        2 = (Aprovar)EM_ABERTO_CONTAS - FINALIZADO,
+                        3 = (Reprovar)RECUSADO_VIAGEM - RECUSADO_CONTAS,
+                        4 = AGUARDANDO_APROVACAO_CONTAS*/
+        
+                    // Realiza a ação de salvar e enviar para aprovação.
+                    if (validarSolicitacao(solicitacao, status > 0)) {
+                        var solViagem = angular.copy(solicitacao);
+        
+                        solViagem.DataIdaS = solViagem.DataIda;
+                        solViagem.DataIda = null;
+        
+                        solViagem.DataVoltaS = solViagem.DataVolta;
+                        solViagem.DataVolta = null;
+        
+                        for (var i = 0; i < solViagem.Custos.length; i++) {
+                            if (typeof solViagem.Custos[i].Id == 'undefined' || solViagem.Custos[i].Id < 0)                    
+                            {
+                                solViagem.Custos[i].TipoI = solViagem.Custos[i].Tipo;
+                            }                    
+                        }
+        
+        
+                        solViagem.EnviarAprovacao = false;
+                        solViagem.Aprovado = false;
+                        solViagem.AprovadoCustos = false;
+                        solViagem.Reprovado = false;
+                        solViagem.ReprovadoCustos = false;
+                        solViagem.EnviarAprovacaoCustos = false;
+        
+                        if (solViagem.Status == 0 && status == 2)
+                        {
+                            // Não salvou solicitação, mandou direto para aprovação.
+                            status = 1;
+                        }
+        
+                        if (solViagem.Status == 3 && status == 2)
+                        {
+                            // Enviado para aprovação de custos
+                            status = 4;
+                        }
+        
+                        switch (status)
+                        {
+                            case 0:
+                                // Seta o usuário logado como o dono da solicitação.
+                                solViagem.IdUsuario = $scope.usuarioLogado.Id;
+                                break;
+                            case 1:
+                                solViagem.EnviarAprovacao = true;
+                                break;
+                            case 2:
+                                if (solViagem.Status == 1)
+                                {
+                                    // EM_ABERTO_CONTAS
+                                    solViagem.Aprovado = true;
+                                }
+                                else
+                                {
+                                    // FINALIZADO
+                                    solViagem.AprovadoCustos = true;
+                                }
+                                break;
+                            case 3:
+                                if (solViagem.Status == 1)
+                                {
+                                    // RECUSADO_VIAGEM
+                                    solViagem.Reprovado = true;
+                                }
+                                else
+                                {
+                                    // RECUSADO_CONTAS
+                                    solViagem.ReprovadoCustos = true;
+                                }
+                                break;
+                            case 4:
+                                solViagem.EnviarAprovacaoCustos = true;
+                                break;
+                        }
+        
+                        $http({
+                            method: 'POST',
+                            url: caminhoApi + '/solicitacao/salvar',
+                            headers: {
+                                'Content-Type': "application/json; charset=utf-"
+                            },
+                            data: JSON.stringify(solViagem)
+                        }).then(function (response) {
+                                var data = response.data;
+        
+                                if (data.Sucesso) {
+        
+                                    var msg = '';
+                                    switch (status)
+                                    {
+                                        case 0:
+                                            msg = 'Solicitação de viagem e prestação de custos salvos com sucesso!';
+                                            break;
+                                        case 1:
+                                            msg = 'Solicitação de viagem enviada para aprovação!';
+                                            break;
+                                        case 2:
+                                            if (solViagem.Status == 1)
+                                            {
+                                                msg = 'Solicitação de viagem aprovada com sucesso!';
+                                            }
+                                            else
+                                            {
+                                                msg = 'Prestação de custos aprovados com sucesso!';
+                                            }
+                                            break;
+                                        case 3:
+                                            if (solViagem.Status == 1)
+                                            {
+                                                msg = 'Solicitação de viagem recusada com sucesso!';
+                                            }
+                                            else
+                                            {
+                                                msg = 'Prestação de custos recusados com sucesso!';
+                                            }
+                                            break;
+                                        case 4:
+                                            msg = 'Prestação de custos enviados para aprovação!';
+                                            break;
+                                    }
+        
+                                    toastr.success(msg);
+                                    $window.location.href = $scope.menuColaborador;
+                                } else {
+                                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao realizar a ação, tente novamente.');
+                                }
+                            },
+                            function (response) {
+                                toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao realizar a ação, tente novamente.');
+                            });
+                    }
+                }
+
+                function validarSolicitacao(solicitacao, envioAprovacao) {
+                    if (typeof envioAprovacao == 'undefined' || envioAprovacao == null) {
+                        envioAprovacao = true;
+                    }
+        
+                    if (typeof solicitacao == 'undefined' || solicitacao == null) {
+                        toastr.error('Objeto de solicitação de viagem vazio.');
+                        return false;
+                    } else if (typeof solicitacao.UfOrigem == 'undefined' || solicitacao.UfOrigem == null || solicitacao.UfOrigem.length == 0) {
+                        toastr.error("Campo 'UF Origem' inválido.");
+                        return false;
+                    } else if (solicitacao.UfOrigem.length > 2) {
+                        toastr.error("Campo 'UF Origem' maior que 2 caracteres.");
+                        return false;
+                    } else if (typeof solicitacao.CidadeOrigem == 'undefined' || solicitacao.CidadeOrigem == null || solicitacao.CidadeOrigem.length == 0) {
+                        toastr.error("Campo 'Origem' inválido.");
+                        return false;
+                    } else if (solicitacao.CidadeOrigem.length > 255) {
+                        toastr.error("Campo 'Origem' maior que 255 caracteres.");
+                        return false;
+                    } else if (typeof solicitacao.UfDestino == 'undefined' || solicitacao.UfDestino == null || solicitacao.UfDestino.length == 0) {
+                        toastr.error("Campo 'UF Destino' inválido.");
+                        return false;
+                    } else if (solicitacao.UfDestino.length > 2) {
+                        toastr.error("Campo 'UF Destino' maior que 2 caracteres.");
+                        return false;
+                    } else if (typeof solicitacao.CidadeDestino == 'undefined' || solicitacao.CidadeDestino == null || solicitacao.CidadeDestino.length == 0) {
+                        toastr.error("Campo 'Destino' inválido.");
+                        return false;
+                    } else if (solicitacao.CidadeDestino.length > 255) {
+                        toastr.error("Campo 'Destino' maior que 255 caracteres.");
+                        return false;
+                    } else if (typeof solicitacao.DataIda == 'undefined' || solicitacao.DataIda == null || solicitacao.DataIda.length == 0) {
+                        toastr.error("Campo 'Data Ida' inválido.");
+                        return false;
+                    } else if (typeof solicitacao.DataVolta == 'undefined' || solicitacao.DataVolta == null || solicitacao.DataVolta.length == 0) {
+                        toastr.error("Campo 'Data Volta' inválido.");
+                        return false;
+                    } else if (typeof solicitacao.Motivo == 'undefined' || solicitacao.Motivo == null || solicitacao.Motivo.length == 0) {
+                        toastr.error("Campo 'Motivo' inválido.");
+                        return false;
+                    } else if (solicitacao.Motivo.length > 255) {
+                        toastr.error("Campo 'Motivo' maior que 255 caracteres.");
+                        return false;
+                    } else if (typeof solicitacao.Observacao != 'undefined' && solicitacao.Observacao != null && solicitacao.Observacao.length > 255) {
+                        toastr.error("Campo 'Observação' maior que 255 caracteres.");
+                        return false;
+                    } else if (envioAprovacao && (typeof solicitacao.Custos == 'undefined' || solicitacao.Custos == null || solicitacao.Custos.length == 0)) {
+                        toastr.error("Favor informar prestação de custos da viagem.");
+                        return false;
+                    }
+        
+                    return true;
+                }
 
     function Limpar() {
         $scope.LimparUsuarioLogado();
@@ -412,144 +609,7 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
 
         $scope.enviarSalvar = function (status) {
             
-                        /* status define o status a ser setado para a solicitação de viagem
-                            0 = EmAberto,
-                            1 = AGUARDANDO_APROVACAO_VIAGEM,
-                            2 = (Aprovar)EM_ABERTO_CONTAS - FINALIZADO,
-                            3 = (Reprovar)RECUSADO_VIAGEM - RECUSADO_CONTAS,
-                            4 = AGUARDANDO_APROVACAO_CONTAS*/
-            
-                        // Realiza a ação de salvar e enviar para aprovação.
-                        if (validarSolicitacao($scope.Solicitacao, status > 0)) {
-                            var solViagem = angular.copy($scope.Solicitacao);
-            
-                            solViagem.DataIdaS = solViagem.DataIda;
-                            solViagem.DataIda = null;
-            
-                            solViagem.DataVoltaS = solViagem.DataVolta;
-                            solViagem.DataVolta = null;
-            
-                            for (var i = 0; i < solViagem.Custos.length; i++) {
-                                if (typeof solViagem.Custos[i].Id == 'undefined' || solViagem.Custos[i].Id < 0)                    
-                                {
-                                    solViagem.Custos[i].TipoI = solViagem.Custos[i].Tipo;
-                                }                    
-                            }
-            
-            
-                            solViagem.EnviarAprovacao = false;
-                            solViagem.Aprovado = false;
-                            solViagem.AprovadoCustos = false;
-                            solViagem.Reprovado = false;
-                            solViagem.ReprovadoCustos = false;
-                            solViagem.EnviarAprovacaoCustos = false;
-            
-                            if (solViagem.Status == 0 && status == 2)
-                            {
-                                // Não salvou solicitação, mandou direto para aprovação.
-                                status = 1;
-                            }
-            
-                            if (solViagem.Status == 3 && status == 2)
-                            {
-                                // Enviado para aprovação de custos
-                                status = 4;
-                            }
-            
-                            switch (status)
-                            {
-                                case 0:
-                                    // Seta o usuário logado como o dono da solicitação.
-                                    solViagem.IdUsuario = $scope.usuarioLogado.Id;
-                                    break;
-                                case 1:
-                                    solViagem.EnviarAprovacao = true;
-                                    break;
-                                case 2:
-                                    if (solViagem.Status == 1)
-                                    {
-                                        // EM_ABERTO_CONTAS
-                                        solViagem.Aprovado = true;
-                                    }
-                                    else
-                                    {
-                                        // FINALIZADO
-                                        solViagem.AprovadoCustos = true;
-                                    }
-                                    break;
-                                case 3:
-                                    if (solViagem.Status == 1)
-                                    {
-                                        // RECUSADO_VIAGEM
-                                        solViagem.Reprovado = true;
-                                    }
-                                    else
-                                    {
-                                        // RECUSADO_CONTAS
-                                        solViagem.ReprovadoCustos = true;
-                                    }
-                                    break;
-                                case 4:
-                                    solViagem.EnviarAprovacaoCustos = true;
-                                    break;
-                            }
-            
-                            $http({
-                                method: 'POST',
-                                url: caminhoApi + '/solicitacao/salvar',
-                                headers: {
-                                    'Content-Type': "application/json; charset=utf-"
-                                },
-                                data: JSON.stringify(solViagem)
-                            }).then(function (response) {
-                                    var data = response.data;
-            
-                                    if (data.Sucesso) {
-            
-                                        var msg = '';
-                                        switch (status)
-                                        {
-                                            case 0:
-                                                msg = 'Solicitação de viagem e prestação de custos salvos com sucesso!';
-                                                break;
-                                            case 1:
-                                                msg = 'Solicitação de viagem enviada para aprovação!';
-                                                break;
-                                            case 2:
-                                                if (solViagem.Status == 1)
-                                                {
-                                                    msg = 'Solicitação de viagem aprovada com sucesso!';
-                                                }
-                                                else
-                                                {
-                                                    msg = 'Prestação de custos aprovados com sucesso!';
-                                                }
-                                                break;
-                                            case 3:
-                                                if (solViagem.Status == 1)
-                                                {
-                                                    msg = 'Solicitação de viagem recusada com sucesso!';
-                                                }
-                                                else
-                                                {
-                                                    msg = 'Prestação de custos recusados com sucesso!';
-                                                }
-                                                break;
-                                            case 4:
-                                                msg = 'Prestação de custos enviados para aprovação!';
-                                                break;
-                                        }
-            
-                                        toastr.success(msg);
-                                        $window.location.href = $scope.menuColaborador;
-                                    } else {
-                                        toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao realizar a ação, tente novamente.');
-                                    }
-                                },
-                                function (response) {
-                                    toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao realizar a ação, tente novamente.');
-                                });
-                        }
+            $scope.SalvarSolicitacao($scope.Solicitacao, status);
                     }
 
         
@@ -648,61 +708,6 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
                 function (response) {
                     toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao remover a solicitação de viagem, tente novamente.');
                 });
-        }
-
-        function validarSolicitacao(solicitacao, envioAprovacao) {
-            if (typeof envioAprovacao == 'undefined' || envioAprovacao == null) {
-                envioAprovacao = true;
-            }
-
-            if (typeof solicitacao == 'undefined' || solicitacao == null) {
-                toastr.error('Objeto de solicitação de viagem vazio.');
-                return false;
-            } else if (typeof solicitacao.UfOrigem == 'undefined' || solicitacao.UfOrigem == null || solicitacao.UfOrigem.length == 0) {
-                toastr.error("Campo 'UF Origem' inválido.");
-                return false;
-            } else if (solicitacao.UfOrigem.length > 2) {
-                toastr.error("Campo 'UF Origem' maior que 2 caracteres.");
-                return false;
-            } else if (typeof solicitacao.CidadeOrigem == 'undefined' || solicitacao.CidadeOrigem == null || solicitacao.CidadeOrigem.length == 0) {
-                toastr.error("Campo 'Origem' inválido.");
-                return false;
-            } else if (solicitacao.CidadeOrigem.length > 255) {
-                toastr.error("Campo 'Origem' maior que 255 caracteres.");
-                return false;
-            } else if (typeof solicitacao.UfDestino == 'undefined' || solicitacao.UfDestino == null || solicitacao.UfDestino.length == 0) {
-                toastr.error("Campo 'UF Destino' inválido.");
-                return false;
-            } else if (solicitacao.UfDestino.length > 2) {
-                toastr.error("Campo 'UF Destino' maior que 2 caracteres.");
-                return false;
-            } else if (typeof solicitacao.CidadeDestino == 'undefined' || solicitacao.CidadeDestino == null || solicitacao.CidadeDestino.length == 0) {
-                toastr.error("Campo 'Destino' inválido.");
-                return false;
-            } else if (solicitacao.CidadeDestino.length > 255) {
-                toastr.error("Campo 'Destino' maior que 255 caracteres.");
-                return false;
-            } else if (typeof solicitacao.DataIda == 'undefined' || solicitacao.DataIda == null || solicitacao.DataIda.length == 0) {
-                toastr.error("Campo 'Data Ida' inválido.");
-                return false;
-            } else if (typeof solicitacao.DataVolta == 'undefined' || solicitacao.DataVolta == null || solicitacao.DataVolta.length == 0) {
-                toastr.error("Campo 'Data Volta' inválido.");
-                return false;
-            } else if (typeof solicitacao.Motivo == 'undefined' || solicitacao.Motivo == null || solicitacao.Motivo.length == 0) {
-                toastr.error("Campo 'Motivo' inválido.");
-                return false;
-            } else if (solicitacao.Motivo.length > 255) {
-                toastr.error("Campo 'Motivo' maior que 255 caracteres.");
-                return false;
-            } else if (typeof solicitacao.Observacao != 'undefined' && solicitacao.Observacao != null && solicitacao.Observacao.length > 255) {
-                toastr.error("Campo 'Observação' maior que 255 caracteres.");
-                return false;
-            } else if (envioAprovacao && (typeof solicitacao.Custos == 'undefined' || solicitacao.Custos == null || solicitacao.Custos.length == 0)) {
-                toastr.error("Favor informar prestação de custos da viagem.");
-                return false;
-            }
-
-            return true;
         }
 
         $(document).ready(function () {
@@ -862,6 +867,7 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
             else
             {
                 $('#modalReprovar').modal('hide');
+                $scope.SalvarSolicitacao($scope.Solicitacao, 3);
             }
         }
 
@@ -873,7 +879,7 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
             $scope.Solicitacao = angular.copy(SolicitacaoGet());
             $('#modalAprovar').modal('hide');
 
-            $scope.childmethod();
+            $scope.SalvarSolicitacao($scope.Solicitacao, 2);
         }
 
         function Limpar() {
