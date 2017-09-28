@@ -408,6 +408,9 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                         envioAprovacao = true;
                     }
         
+                    var dataAtual = new Date();
+                    dataAtual = dataAtual.setHours(0,0,0,0);
+
                     if (typeof solicitacao == 'undefined' || solicitacao == null) {
                         toastr.error('Objeto de solicitação de viagem vazio.');
                         return false;
@@ -439,7 +442,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                         toastr.error("Campo 'Data Ida' inválido.");
                         return false;
                     }
-                    else if (solicitacao.Status == 0 && solicitacao.DataIda.getTime() < new Date().getTime())
+                    else if (solicitacao.Status == 0 && solicitacao.DataIda.getTime() < dataAtual.getTime())
                     {
                         toastr.error("Campo 'Data Ida' deve ser maior ou igual a data de hoje.");
                         return false;
