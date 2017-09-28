@@ -441,7 +441,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                     }
                     else if (solicitacao.Status == 0 && solicitacao.DataIda.getTime() < new Date().getTime())
                     {
-                        toastr.error("Campo 'Data Ida' deve ser maior a data de hoje.");
+                        toastr.error("Campo 'Data Ida' deve ser maior ou igual a data de hoje.");
                         return false;
                     } else if (typeof solicitacao.DataVolta == 'undefined' || solicitacao.DataVolta == null || solicitacao.DataVolta.length == 0) {
                         toastr.error("Campo 'Data Volta' inválido.");
