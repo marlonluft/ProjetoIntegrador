@@ -70,6 +70,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
             return false;
         }
 
+        $scope.UsuarioNome = window.localStorage.getItem('usuarioNome');
         $scope.PerfilGestor = window.localStorage.getItem('PerfilGestor') == 1;
 
         return true;
@@ -481,6 +482,7 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                         if (login.lembrar) {
                             window.localStorage.setItem('cpf', login.cpf);
                             window.localStorage.setItem('senha', login.senha);
+                            window.localStorage.setItem('usuarioNome', data.Nome);
                         } else {
                             window.localStorage.removeItem('cpf');
                             window.localStorage.removeItem('senha');
