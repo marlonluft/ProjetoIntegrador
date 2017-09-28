@@ -206,3 +206,8 @@ textarea {
 #tableStatus tr td{
     width: 140px;
 }
+
+
+select {
+    color: #666666!important;
+}
