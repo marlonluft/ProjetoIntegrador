@@ -61,6 +61,44 @@ projetoIntegrador.config(function ($routeProvider, $windowProvider, $locationPro
 // CONTROLLERs
 projetoIntegrador.controller('mainController', function ($scope, $window, $http, toastr) {
 
+    $scope.CoresStatus = function(status, solicitacaoStatus)
+    {
+        if ((status == 1 && solicitacaoStatus == 2) || (status == 4 && solicitacaoStatus == 5))
+        {
+            // reprovado solicitação viagem / custos
+            return "#c7383c";
+        }
+        else if (status < solicitacaoStatus || (status == 6 && solicitacaoStatus == 6))
+        {
+            return "#0c7cd5";
+        }
+        else if (status === solicitacaoStatus)
+        {
+            return "#585858";
+        }
+        else
+        {
+            return "#8ec6f3";
+        }
+    }
+
+    $scope.IconeStatus = function(status, solicitacaoStatus, padrao)
+    {
+        if ((status == 1 && solicitacaoStatus == 2) || (status == 4 && solicitacaoStatus == 5))
+        {
+            // reprovado solicitação viagem / custos
+            return "fa-times";
+        }
+        else if (status < solicitacaoStatus || (status == 6 && solicitacaoStatus == 6))
+        {
+            return "fa-check";
+        }
+        else
+        {
+            return padrao;
+        }
+    }
+
     $scope.ValidarLogin = function () {
         if ($scope.usuarioLogado == null ||
             typeof $scope.usuarioLogado == 'undefined' ||

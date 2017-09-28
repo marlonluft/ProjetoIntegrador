@@ -2,6 +2,55 @@
 
     <div class="row">
         <div class="col-lg-12">
+
+            <table id="tableStatus">
+                <tr>
+                    <td>
+                        <span class="fa-stack fa-stack fa-2x" ng-style="{'color':CoresStatus(0, Solicitacao.Status)}">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa fa-stack-1x fa-inverse" ng-class="IconeStatus(0, Solicitacao.Status, 'fa-pencil')"></i>
+                        </span>
+                    </td>
+                    <td>
+                    <span class="fa-stack fa-stack fa-2x" ng-style="{'color':CoresStatus(1, Solicitacao.Status)}">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa fa-stack-1x fa-inverse" ng-class="IconeStatus(1, Solicitacao.Status, 'fa-plane')"></i>
+                        </span>
+                    </td>
+                    <td>
+                        <span class="fa-stack fa-stack fa-2x" ng-style="{'color':CoresStatus(3, Solicitacao.Status)}">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa fa-stack-1x fa-inverse" ng-class="IconeStatus(3, Solicitacao.Status, 'fa-money')"></i>
+                        </span>
+                    </td>
+                    <td>
+                    <span class="fa-stack fa-stack fa-2x" ng-style="{'color':CoresStatus(4, Solicitacao.Status)}">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa fa-stack-1x fa-inverse" ng-class="IconeStatus(4, Solicitacao.Status, 'fa-gavel')"></i>
+                        </span>
+                    </td>
+                    <td>
+                        <span class="fa-stack fa-stack fa-2x" ng-style="{'color':CoresStatus(6, Solicitacao.Status)}">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa fa-stack-1x fa-inverse" ng-class="IconeStatus(6, Solicitacao.Status, 'fa-flag')"></i>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Solicitação de Viagem</td>
+                    <td>Aprovação de Viagem</td>
+                    <td>Prestação de Contas</td>
+                    <td>Aprovação de Contas</td>
+                    <td>Solicitação Finalizada</td>
+                </tr>
+            </table>
+
+            
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
             <div class="page-header">
                 <h4 id="typography">Solicitação de Viagem</h4>
             </div>
