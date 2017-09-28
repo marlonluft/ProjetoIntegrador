@@ -70,6 +70,8 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
             return false;
         }
 
+        $scope.PerfilGestor = window.localStorage.getItem('PerfilGestor') == 1;
+
         return true;
     }
 
