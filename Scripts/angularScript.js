@@ -438,6 +438,11 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                     } else if (typeof solicitacao.DataIda == 'undefined' || solicitacao.DataIda == null || solicitacao.DataIda.length == 0) {
                         toastr.error("Campo 'Data Ida' inválido.");
                         return false;
+                    }
+                    else if (solicitacao.Status == 0 && solicitacao.DataIda.getTime() < new Date().getTime())
+                    {
+                        toastr.error("Campo 'Data Ida' é menor que a data atual.");
+                        return false;
                     } else if (typeof solicitacao.DataVolta == 'undefined' || solicitacao.DataVolta == null || solicitacao.DataVolta.length == 0) {
                         toastr.error("Campo 'Data Volta' inválido.");
                         return false;
