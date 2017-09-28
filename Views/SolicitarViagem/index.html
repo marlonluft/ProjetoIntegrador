@@ -146,8 +146,8 @@
                     <td ng-bind="conta.Quantidade"></td>
                     <td ng-bind="conta.ValorPrestado || conta.ValorSolicitado"></td>
                     <td>
-                        <button class="btn btn-danger btn-sm" data-toggle="tooltip" title="Remover" ng-if="EditarContas">
-                            <i class="fa fa-trash" aria-hidden="true" ng-click="removerPrestacaoConta(conta.Ordem);"></i>
+                        <button class="btn btn-danger btn-sm" data-toggle="tooltip" title="Remover" ng-if="EditarContas" ng-click="removerPrestacaoConta(conta.Ordem);">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
                         </button>
                         <lable ng-if="!EditarContas">N/A</lable>
                     </td>

@@ -39,7 +39,7 @@
                             Login
                         </a>
                     </li>
-                    <li ng-if="menuGestor.length > 0">
+                    <li ng-if="menuGestor.length > 0 && PerfilGestor">
                         <a href="{{menuGestor}}">
                             <i class="fa fa-cogs" aria-hidden="true"></i>
                             Gestor
@@ -57,7 +57,7 @@
                             Setor
                         </a>
                     </li>                    
-                    <li ng-if="menuColaborador.length > 0">
+                    <li ng-if="menuColaborador.length > 0 && !PerfilGestor">
                         <a href="{{menuColaborador}}">
                             <i class="fa fa-suitcase" aria-hidden="true"></i>
                             Colaborador
