@@ -450,9 +450,23 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                     } else if (typeof solicitacao.Observacao != 'undefined' && solicitacao.Observacao != null && solicitacao.Observacao.length > 255) {
                         toastr.error("Campo 'Observação' maior que 255 caracteres.");
                         return false;
-                    } else if (envioAprovacao && (typeof solicitacao.Custos == 'undefined' || solicitacao.Custos == null || solicitacao.Custos.length == 0)) {
-                        toastr.error("Favor informar prestação de custos da viagem.");
-                        return false;
+                    } else if (envioAprovacao) 
+                    {
+                        if (typeof solicitacao.Custos == 'undefined' || solicitacao.Custos == null || solicitacao.Custos.length == 0)
+                        {
+                            toastr.error("Favor informar prestação de custos da viagem.");
+                            return false;
+                        }
+
+                        for (var x = 0; x < solicitacao.Custos.length; x++)
+                        {
+                            if (solicitacao.Custos[x].ValorSolicitado < 1)
+                            {
+                                toastr.error("Um ou mais valores de prestação de custos está(ão) inválido(s).");
+                                return false;
+                            }
+                        }
+                        
                     }
         
                     return true;
