@@ -174,14 +174,17 @@
                 <tr>
                     <th>Categoria</th>
                     <th>Quantidade</th>
-                    <th>Valor</th>
-                    <th>Ação</th>
+                    <th title="Valor Solicitado">Valor Solicitado</th>
+                    <th ng-if="Solicitacao.Status >= 3" title="Valor Prestado">Valor Prestado</th>
+                    <th style="text-align: center;">Ação</th>
                 </tr>
             </thead>
             <tfoot>
                 <tr ng-show="Solicitacao.Custos.length > 0">
                     <td colspan="2" style="text-align: right;">Valor Total:</td>
-                    <td colspan="2" id="txtValorTotal" ng-bind="CustoTotal | currency:'R$ '" ng-init="0" style="text-align: left;"></td>
+                    <td id="txtValorTotalS" ng-bind="CustoTotalS | currency:'R$ '" ng-init="0" style="text-align: left;"></td>
+                    <td ng-if="Solicitacao.Status >= 3" id="txtValorTotalP" ng-bind="CustoTotalP | currency:'R$ '" ng-init="0" style="text-align: left;"></td>
+                    <td style="text-align: center;"><span ng-if="Solicitacao.Status >= 3">Resultado: <span id="txtValorResultado" ng-bind="CustoResultado" ng-style="{'color': ResultadoCor}" style="font-style: italic;"></span></span></td>
                 </tr>
                 <tr ng-show="Solicitacao.Custos.length == 0">
                     <td colspan="4" style="text-align: center;">
@@ -193,12 +196,16 @@
                 <tr ng-repeat="conta in Solicitacao.Custos track by conta.Ordem">
                     <td ng-bind="recupearDescricaoCategoria(conta.TipoI)"></td>
                     <td ng-bind="conta.Quantidade"></td>
-                    <td ng-bind="conta.ValorPrestado || conta.ValorSolicitado"></td>
-                    <td>
-                        <button class="btn btn-danger btn-sm" data-toggle="tooltip" title="Remover" ng-if="EditarContas" ng-click="removerPrestacaoConta(conta.Ordem);">
+                    <td ng-bind="conta.ValorSolicitado"></td>
+                    <td ng-if="Solicitacao.Status >= 3">
+                        <span ng-if="Solicitacao.Status != 3" ng-bind="conta.ValorPrestado"></span>
+                        <input ng-if="Solicitacao.Status == 3" class="form-control valorPrestado" type="text" value="" ng-model="conta.ValorPrestado">
+                    </td>
+                    <td style="text-align: center;">
+                        <button class="btn btn-danger btn-sm" data-toggle="tooltip" title="Remover" ng-if="EditarContas && Solicitacao.Status == 0" ng-click="removerPrestacaoConta(conta.Ordem);">
                             <i class="fa fa-trash" aria-hidden="true"></i>
                         </button>
-                        <lable ng-if="!EditarContas">N/A</lable>
+                        <lable ng-if="!EditarContas || Solicitacao.Status === 3">N/A</lable>
                     </td>
                 </tr>
             </tbody>

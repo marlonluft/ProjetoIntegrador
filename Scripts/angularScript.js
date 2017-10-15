@@ -467,7 +467,13 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
 
                         for (var x = 0; x < solicitacao.Custos.length; x++)
                         {
-                            if (solicitacao.Custos[x].ValorSolicitado < 1)
+                            if (
+                                (solicitacao.Custos[x].ValorSolicitado < 1) || 
+                                (solicitacao.Status === 3 && 
+                                (typeof solicitacao.Custos[x].ValorPrestado == 'undefined' || 
+                                    solicitacao.Custos[x].ValorPrestado == null || 
+                                    solicitacao.Custos[x].ValorPrestado.length == 0))
+                               )
                             {
                                 toastr.error("Um ou mais valores de prestação de custos está(ão) inválido(s).");
                                 return false;
@@ -714,16 +720,33 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
         }
 
         function recuperarTotalPrestacaoContas() {
-            var total = 0;
+            var totalS = 0;
+            var totalP = 0;
 
             $scope.Solicitacao.Custos.forEach(function (element) {
-                total = total + (parseInt(element.Quantidade) * parseFloat(element.ValorSolicitado));
+                totalS = totalS + (parseInt(element.Quantidade) * parseFloat(element.ValorSolicitado));
+                totalP = totalP + (parseInt(element.Quantidade) * parseFloat(element.ValorPrestado));
             }, this);
 
-            $scope.CustoTotal = total.toFixed(2);
+            $scope.CustoTotalS = totalS.toFixed(2);
+            $scope.CustoTotalP = totalP.toFixed(2);
+
+            $scope.CustoResultado = (totalS - totalP);
+
+            if ($scope.CustoResultado === 0)
+            {
+                $scope.ResultadoCor = "#000";
+            }
+            else
+            {
+                $scope.ResultadoCor = $scope.CustoResultado < 0 ? "#e80000" : "#00c33e";
+            }
+
+            $scope.CustoResultado = $scope.CustoResultado.toFixed(2);
 
             $timeout(function () {
-                $('#txtValorTotal').mask("#.###.###.##0,00", {
+                // Solicitado / Prestado / Resultado
+                $('#txtValorTotalS, #txtValorTotalP, #txtValorResultado').mask("#.###.###.##0,00", {
                     reverse: true
                 });
             }, 1);
@@ -774,7 +797,7 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
         }
 
         $(document).ready(function () {
-            $('#txtValor').mask("#.##0,00", {
+            $('#txtValor, .valorPrestado').mask("#.##0,00", {
                 reverse: true
             });
             $('#txtQuantidade').mask("00", {
@@ -797,7 +820,7 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
                     {
                         // Somente colaborador
                         $scope.EditarContas = true;
-                    }                    
+                    }
                     break;
                 default:
                 case 0:
