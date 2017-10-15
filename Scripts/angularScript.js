@@ -61,6 +61,12 @@ projetoIntegrador.config(function ($routeProvider, $windowProvider, $locationPro
 // CONTROLLERs
 projetoIntegrador.controller('mainController', function ($scope, $window, $http, toastr) {
 
+    $scope.Redirecionar = function(url)
+    {
+        $('html, body').animate({ scrollTop: 0 }, 'swing');
+        $window.location.href = url;
+    }
+
     $scope.CoresStatus = function(status, solicitacaoStatus)
     {
         if ((status == 1 && solicitacaoStatus == 2) || (status == 4 && solicitacaoStatus == 5))
@@ -103,7 +109,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         if ($scope.usuarioLogado == null ||
             typeof $scope.usuarioLogado == 'undefined' ||
             $scope.usuarioLogado.Id < 0) {
-            $window.location.href = $scope.menuLogin;
+            $scope.Redirecionar($scope.menuLogin);
 
             return false;
         }
@@ -223,10 +229,12 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                 var data = response.data;
 
                 if (data.Sucesso) {
-                    for (var i = 0; i < data.Lista.length; i++) {
+                    for (var i = 0; i < data.Lista.length; i++) 
+                    {
                         if (typeof data.Lista[i].Custos != 'undefined' && data.Lista[i].Custos != null) {
                             for (var x = 0; x < data.Lista[i].Custos.length; x++) {
                                 data.Lista[i].Custos[x].Ordem = x;
+                                data.Lista[i].Custos[x].NovaPrestacao = false;
                             }
                         }
                     }
@@ -281,6 +289,15 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                         solViagem.DataVolta = null;
         
                         for (var i = 0; i < solViagem.Custos.length; i++) {
+
+                            if (solViagem.Status === 3 && typeof solViagem.Custos[i].ValorPrestado != "number")
+                            {
+                                var valor = solViagem.Custos[i].ValorPrestado.replace(".", "");
+                                valor = valor.replace(",", ".");
+
+                                solViagem.Custos[i].ValorPrestado = parseFloat(valor);                                
+                            }
+
                             if (typeof solViagem.Custos[i].Id == 'undefined' || solViagem.Custos[i].Id < 0)                    
                             {
                                 solViagem.Custos[i].TipoI = solViagem.Custos[i].Tipo;
@@ -392,13 +409,13 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                                     }
         
                                     toastr.success(msg);
-                                    $window.location.href = $scope.menuColaborador;
+                                    $scope.Redirecionar($scope.menuColaborador);
                                 } else {
                                     toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao realizar a ação, tente novamente.');
                                 }
                             },
                             function (response) {
-                                toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao realizar a ação, tente novamente.');
+                                toastr.error('Falha ao realizar a ação, tente novamente.');
                             });
                     }
                 }
@@ -448,7 +465,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                     } else if (typeof solicitacao.DataVolta == 'undefined' || solicitacao.DataVolta == null || solicitacao.DataVolta.length == 0) {
                         toastr.error("Campo 'Data Volta' inválido.");
                         return false;
-                    } else if (typeof solicitacao.Motivo == 'undefined' || solicitacao.Motivo == null || solicitacao.Motivo.length == 0) {
+                    } else if (typeof solicitacao.Motivo == 'undefined' || solicitacao.Motivo == null || solicitacao.Motivo.length == 0 || solicitacao.Motivo == "0") {
                         toastr.error("Campo 'Motivo' inválido.");
                         return false;
                     } else if (solicitacao.Motivo.length > 255) {
@@ -468,7 +485,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                         for (var x = 0; x < solicitacao.Custos.length; x++)
                         {
                             if (
-                                (solicitacao.Custos[x].ValorSolicitado < 1) || 
+                                (solicitacao.Custos[x].ValorSolicitado < 1 && solicitacao.Status == 0) || 
                                 (solicitacao.Status === 3 && 
                                 (typeof solicitacao.Custos[x].ValorPrestado == 'undefined' || 
                                     solicitacao.Custos[x].ValorPrestado == null || 
@@ -524,8 +541,7 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
         }
     }
 
-    $scope.RealizarLogin = function (login, e) {
-        if (event.which == 13 || e == null) {
+    $scope.RealizarLogin = function (login) {
             if (ValidarLogin(login)) {
                 var model = {
                     CPF: login.cpf,
@@ -560,19 +576,19 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
 
                             // Colaborador
                             case 'COLABORADOR':
-                                $window.location.href = $scope.menuColaborador;
+                                $scope.Redirecionar($scope.menuColaborador);
                                 break;
 
                                 // Gestor
                             case 'GESTOR':
                                 window.localStorage.setItem('PerfilGestor', 1);
-                                $window.location.href = $scope.menuGestor;
+                                $scope.Redirecionar($scope.menuGestor);
                                 break;
 
                                 // Admin
                             default:
                             case 'ADMINISTRADOR':
-                                $window.location.href = $scope.menuUsuario;
+                                $scope.Redirecionar($scope.menuUsuario);
                                 break;
                         }
                         toastr.success('Login efetuado', 'Sucesso!');
@@ -585,11 +601,6 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                     toastr.error('Falha ao realizar a ação, tente novamente.');
                 });
             }
-
-            if (e != null) {
-                e.preventDefault();
-            }
-        }
     }
 
     function ValidarLogin(login) {
@@ -676,13 +687,12 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
             }
         }
 
-        $scope.enviarSalvar = function (status) {
-            
+        $scope.enviarSalvar = function (status) {            
             $scope.SalvarSolicitacao($scope.Solicitacao, status);
-                    }
+        }
 
         
-                    $scope.adicionarPrestacaoConta = function (prestacao) {
+        $scope.adicionarPrestacaoConta = function (prestacao) {
 
             if (typeof prestacao == 'undefined' || prestacao == null) {
                 toastr.error('Favor preencher os campos de pestação de conta.');
@@ -692,12 +702,29 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
                 toastr.error('Quantidade informada é inválida.');
             } else if (prestacao.Quantidade > 10) {
                 toastr.error('Quantidade não pode passar de 10.');
-            } else if (typeof prestacao.ValorSolicitado == 'undefined' || prestacao.ValorSolicitado == null) {
+            } else if (typeof prestacao.Valor == 'undefined' || prestacao.Valor == null) {
                 toastr.error('Valor informado é inválido.');
             } else {
                 var obj = angular.copy(prestacao);
-                obj.ValorSolicitado = obj.ValorSolicitado.replace(".", "");
-                obj.ValorSolicitado = obj.ValorSolicitado.replace(",", ".");
+
+                var valor = obj.Valor.replace(".", "");
+                valor = valor.replace(",", ".");
+
+                if ($scope.Solicitacao.Status == 0)
+                {
+                    obj.ValorSolicitado = valor;
+
+                    // Não é nova prestação pois ainda está provendo os custos que serão realizados.
+                    obj.NovaPrestacao = false;
+                }
+                else
+                {
+                    obj.ValorSolicitado = 0;
+                    obj.ValorPrestado = valor;
+
+                    // Como é prestação de custos e está adicionando novos custos.
+                    obj.NovaPrestacao = true;
+                }
 
                 obj.Id = -1;
                 obj.TipoI = obj.Tipo;
@@ -786,7 +813,7 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
                         toastr.success('Solicitação de viagem removida com sucesso', 'Sucesso!');
 
                         $('#modalRemover').modal('hide');
-                        $window.location.href = $scope.menuColaborador;
+                        $scope.Redirecionar($scope.menuColaborador);
                     } else {
                         toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover a solicitação de viagem, tente novamente.');
                     }
@@ -821,6 +848,10 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
                         // Somente colaborador
                         $scope.EditarContas = true;
                     }
+
+                    // Move o scrol para baixo para a parte de prestação de contas
+                    $('html, body').animate({ scrollTop: $('#tituloPrestacaoContas').offset().top - 50 }, 'swing');
+
                     break;
                 default:
                 case 0:
@@ -868,7 +899,7 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
         /* Métodos */
         $scope.AbrirSolicitacao = function (model) {
             SolicitacaoSet(angular.copy(model));
-            $window.location.href = $scope.menuSolicitarViagem;
+            $scope.Redirecionar($scope.menuSolicitarViagem);
         }
 
         $scope.removerSolicitacao = function (model) {
