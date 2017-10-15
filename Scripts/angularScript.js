@@ -292,10 +292,9 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
 
                             if (solViagem.Status === 3 && typeof solViagem.Custos[i].ValorPrestado != "number")
                             {
-                                var valor = solViagem.Custos[i].ValorPrestado.replace(".", "");
-                                valor = valor.replace(",", ".");
+                                var valor = solViagem.Custos[i].ValorPrestado.replace(",", ".");
 
-                                solViagem.Custos[i].ValorPrestado = parseFloat(valor);                                
+                                solViagem.Custos[i].ValorPrestado = parseFloat(valor);
                             }
 
                             if (typeof solViagem.Custos[i].Id == 'undefined' || solViagem.Custos[i].Id < 0)                    
@@ -737,7 +736,7 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
 
                 $scope.Solicitacao.Custos.push(obj);
 
-                recuperarTotalPrestacaoContas();
+                $scope.recuperarTotalPrestacaoContas();
             }
         }
 
@@ -746,13 +745,21 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
             return obj.text;
         }
 
-        function recuperarTotalPrestacaoContas() {
+        $scope.recuperarTotalPrestacaoContas = function() {
             var totalS = 0;
             var totalP = 0;
 
             $scope.Solicitacao.Custos.forEach(function (element) {
                 totalS = totalS + (parseInt(element.Quantidade) * parseFloat(element.ValorSolicitado));
-                totalP = totalP + (parseInt(element.Quantidade) * parseFloat(element.ValorPrestado));
+
+                try
+                {
+                    totalP = totalP + (parseInt(element.Quantidade) * parseFloat(element.ValorPrestado));
+                }
+                catch(ex)
+                {
+                    totalP = totalP + 0;
+                }
             }, this);
 
             $scope.CustoTotalS = totalS.toFixed(2);
@@ -790,7 +797,7 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
                 }
             }
 
-            recuperarTotalPrestacaoContas();
+            $scope.recuperarTotalPrestacaoContas();
         }
 
         $scope.removerPrestacaoConta = function (ordem) {
@@ -834,7 +841,7 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
 
         function Limpar() {
             $scope.Solicitacao = angular.copy(SolicitacaoGet());
-            recuperarTotalPrestacaoContas();
+            $scope.recuperarTotalPrestacaoContas();
 
             $scope.EditarViagem = false;
             $scope.EditarContas = false;

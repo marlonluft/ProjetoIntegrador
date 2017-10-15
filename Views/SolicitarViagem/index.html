@@ -199,7 +199,7 @@
                     <td ng-bind="conta.ValorSolicitado"></td>
                     <td ng-if="Solicitacao.Status >= 3">
                         <span ng-if="Solicitacao.Status != 3 || conta.NovaPrestacao" ng-bind="conta.ValorPrestado"></span>
-                        <input ng-if="Solicitacao.Status == 3 && !conta.NovaPrestacao" class="form-control valorPrestado" type="text" value="" ng-model="conta.ValorPrestado">
+                        <input ng-change="recuperarTotalPrestacaoContas()" ng-if="Solicitacao.Status == 3 && !conta.NovaPrestacao" class="form-control valorPrestado" type="text" value="" ng-model="conta.ValorPrestado">
                     </td>
                     <td style="text-align: center;">
                         <button class="btn btn-danger btn-sm" data-toggle="tooltip" title="Remover" ng-if="(EditarContas && Solicitacao.Status == 0) || conta.NovaPrestacao" ng-click="removerPrestacaoConta(conta.Ordem);">
