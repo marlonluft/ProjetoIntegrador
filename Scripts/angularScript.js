@@ -1177,6 +1177,12 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
 
         $scope.SalvarUsuario = function (model) {
             if (ValidarUsuario(model)) {
+
+                if (model.Perfil === 'GESTOR' || model.Perfil === 'ADMINISTRADOR')
+                {
+                    model.IdSetor = -1;
+                }
+
                 $http({
                     method: 'POST',
                     url: caminhoApi + '/usuario/manipular',
