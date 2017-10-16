@@ -183,6 +183,17 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                 var data = response.data;
 
                 if (data.Sucesso) {
+
+                    for (var x = 0; x < data.Lista.length; x++)
+                    {
+                        // usuário logado não pode ser removido.
+                        if (data.Lista[x].CPF === window.localStorage.getItem('cpf'))
+                        {
+                            data.Lista[x].PodeRemover = false;
+                            break;
+                        }
+                    }
+
                     $scope.ListaUsuarios = data.Lista;
                 } else {
                     toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de usuários, tente novamente.');
@@ -1148,6 +1159,7 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
         }
 
         $scope.ConfirmarRemover = function (id) {
+
             var model = {
                 Id: id
             }
