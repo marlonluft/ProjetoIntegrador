@@ -136,6 +136,7 @@
             <div class="modal-body">
 
                 Você tem certeza que deseja remover o usuário '{{Usuario.Nome}}'? Esta ação não poderá ser desfeita.
+                <b ng-if="Usuario.Perfil == 'COLABORADOR'" style="color: rgb(236, 4, 4);"><br/>Caso existam solicitações de viagens vinculadas a este colaborador as mesmas serão removidas.</b>
 
             </div>
             <div class="modal-footer">
