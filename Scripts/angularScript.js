@@ -1243,7 +1243,7 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                 return false;
             }
 
-            if (model.IdSetor == null || (model.Perfil != 'GESTOR' && model.IdSetor < 0)) {
+            if (model.Perfil === 'COLABORADOR' && (model.IdSetor == null || model.IdSetor < 0)) {
                 toastr.error("O setor selecionado é inválido", "Setor inválido");
                 return false;
             }
