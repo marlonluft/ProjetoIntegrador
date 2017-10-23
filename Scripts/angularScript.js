@@ -502,7 +502,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                                     solicitacao.Custos[x].ValorPrestado.length == 0))
                                )
                             {
-                                toastr.error("Um ou mais valores de prestação de custos está(ão) inválido(s).");
+                                toastr.error("Um ou mais valores de prestação de custos está(ão) com o valor abaixo de R$ 1,00 verifique.");
                                 return false;
                             }
                         }
