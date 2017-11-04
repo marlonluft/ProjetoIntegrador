@@ -122,6 +122,8 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
 
     $scope.LimparUsuarioLogado = function (usuario) {
 
+        $scope.UsuarioNome = '';
+
         if (typeof usuario == 'undefined') {
             $scope.usuarioLogado = {
                 Id: -1,
@@ -552,6 +554,9 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
     }
 
     $scope.RealizarLogin = function (login) {
+
+        $scope.UsuarioNome = '';
+
             if (ValidarLogin(login)) {
                 var model = {
                     CPF: login.cpf,
