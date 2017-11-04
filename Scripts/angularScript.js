@@ -770,7 +770,19 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
 
                 try
                 {
-                    totalP = totalP + (parseInt(element.Quantidade) * parseFloat(element.ValorPrestado));
+                    var valorPrestado = angular.copy(element.ValorPrestado);
+
+                    if (typeof(valorPrestado) === 'string')
+                    {
+                        if (valorPrestado.indexOf(".") > 0 && valorPrestado.indexOf(",") > 0)
+                        {
+                            valorPrestado = valorPrestado.replace(".", "");
+                        }
+
+                        valorPrestado = valorPrestado.replace(",", ".");
+                    }
+
+                    totalP = totalP + (parseInt(element.Quantidade) * parseFloat(valorPrestado));
                 }
                 catch(ex)
                 {
@@ -778,9 +790,13 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
                 }
             }, this);
 
+            // Custo total Solicitado
             $scope.CustoTotalS = totalS.toFixed(2);
+
+            // Custo total Prestado
             $scope.CustoTotalP = totalP.toFixed(2);
 
+            // Custo total resultado solicitado - prestado
             $scope.CustoResultado = (totalS - totalP);
 
             if ($scope.CustoResultado === 0)
