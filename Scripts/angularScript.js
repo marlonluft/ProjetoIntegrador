@@ -138,6 +138,11 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
             }
         }
 
+        // Limpar listas
+        $scope.ListaSolicitacoes = [];
+        $scope.ListaUsuarios = [];
+        $scope.Setores = [];
+
         Atualizarpaginas();
     }
 
