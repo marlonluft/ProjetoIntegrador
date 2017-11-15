@@ -63,6 +63,12 @@
                             Colaborador
                         </a>
                     </li>
+                    <li ng-if="menuEstatistica.length > 0 && PerfilGestor">
+                        <a href="{{menuEstatistica}}">
+                            <i class="fa fa-line-chart" aria-hidden="true"></i>
+                            Estatistica
+                        </a>
+                    </li>
                     <li ng-if="menuSair.length > 0">
                         <a href="{{menuSair}}">
                             <i class="fa fa-sign-out" aria-hidden="true"></i>
@@ -110,11 +116,11 @@
     <script src="/Scripts/Angular/angular.min.js"></script>
     <script src="/Scripts/Angular/angular-route.min.js"></script>
     <script src="/Scripts/site.js?2.0"></script>
-    <script src="/Scripts/angularScript.js?4.0"></script>
+    <script src="/Scripts/angularScript.js?4.5"></script>
     <script src="/Scripts/Angular/angular-animate.min.js"></script>
     <script src="/Scripts/Angular/angular-toastr.tpls.js"></script>
     <script src="/Scripts/jquery.mask.min.js"></script>
-
+    <script src="/Scripts/Chart.bundle.min.js"></script>
 </body>
 
 </html>

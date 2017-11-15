@@ -49,6 +49,10 @@ projetoIntegrador.config(function ($routeProvider, $windowProvider, $locationPro
             templateUrl: '../Views/Error/naoEncontrado.html',
             controller: 'errorController'
         })
+        .when('/estatistica', {
+            templateUrl: '../Views/Estatistica/index.html',
+            controller: 'estatisticaController'
+        })
         .otherwise({
             redirectTo: '/naoEncontrado'
         });
@@ -108,9 +112,9 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
     $scope.ValidarLogin = function () {
         if ($scope.usuarioLogado == null ||
             typeof $scope.usuarioLogado == 'undefined' ||
-            $scope.usuarioLogado.Id < 0) {
+            $scope.usuarioLogado.Id < 0) 
+        {
             $scope.Redirecionar($scope.menuLogin);
-
             return false;
         }
 
@@ -124,18 +128,43 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
 
         $scope.UsuarioNome = '';
 
+        // Verifica se está carregando o site (acabou de entrar)
+        if (window.localStorage.getItem('carregandoMain') == '1')
+        {            
+            window.localStorage.setItem('carregandoMain', '0');
+
+            var objUsuario = LoginGet();
+            if (typeof objUsuario != 'undefined' && objUsuario != null)
+            {
+                usuario = angular.copy(objUsuario);
+
+                if (usuario.Perfil === 'GESTOR')
+                {
+                    window.localStorage.setItem('PerfilGestor', 1);
+                }
+                else
+                {
+                    window.localStorage.setItem('PerfilGestor', 0);
+                }
+            }
+        }
+
         if (typeof usuario == 'undefined') {
             $scope.usuarioLogado = {
                 Id: -1,
                 Perfil: '',
                 Logado: false
             }
+
+            LoginSet(null);
         } else {
             $scope.usuarioLogado = {
                 Id: typeof usuario.Id != 'undefined' ? usuario.Id : -1,
                 Perfil: typeof usuario.Perfil != 'undefined' ? usuario.Perfil : '',
                 Logado: true
             }
+
+            LoginSet(angular.copy($scope.usuarioLogado));
         }
 
         // Limpar listas
@@ -155,6 +184,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         $scope.menuColaborador = $scope.usuarioLogado.Perfil == 'COLABORADOR' || $scope.usuarioLogado.Perfil == 'GESTOR' ? '/#!/colaborador/' : '';
         $scope.menuSolicitarViagem = $scope.usuarioLogado.Perfil == 'COLABORADOR' || $scope.usuarioLogado.Perfil == 'GESTOR' ? '/#!/solicitarViagem/' : '';
         $scope.menuSair = $scope.usuarioLogado.Id >= 0 ? "/#!/?sair" : '';
+        $scope.menuEstatistica = $scope.usuarioLogado.Perfil == 'GESTOR' ? '/#!/estatistica/' : '';
     }
 
     /* Funções de pesquisa compartilhadas */
@@ -520,6 +550,10 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                 }
 
     function Limpar() {
+
+        // Salva variável global que indica que está carregando a página de primeiro acesso e não navegação de páginas.
+        window.localStorage.setItem('carregandoMain', '1');
+
         $scope.LimparUsuarioLogado();
 
         $scope.ListaUsuarios = [];
@@ -527,7 +561,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         $scope.ListaGestores = [];
         $scope.ListaSolicitacoes = [];
         
-        window.localStorage.setItem('PerfilGestor', 0);
+        //window.localStorage.setItem('PerfilGestor', 0);
         $scope.ufLista = ['AC', 'AL', 'AM', 'AP', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MG', 'MS', 'MT', 'PA', 'PB', 'PE', 'PI', 'PR', 'RJ', 'RN', 'RO', 'RR', 'RS', 'SC', 'SE', 'SP', 'TO'];
         window.localStorage.setItem('Solicitacao', null);
     }
@@ -611,6 +645,7 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                                 $scope.Redirecionar($scope.menuUsuario);
                                 break;
                         }
+
                         toastr.success('Login efetuado', 'Sucesso!');
 
                     } else {
@@ -1333,6 +1368,20 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                 reverse: true
             });
         });
+    }
+});
+
+projetoIntegrador.controller('estatisticaController', function ($scope, $http, toastr){
+
+    if ($scope.ValidarLogin()) {
+
+
+        function Limpar()
+        {
+            
+        }
+
+        Limpar();
     }
 });
 

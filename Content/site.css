@@ -211,3 +211,7 @@ textarea {
 select {
     color: #666666!important;
 }
+
+.inputFiltro{
+    min-width: 70px;
+}
