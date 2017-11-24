@@ -49,10 +49,6 @@ projetoIntegrador.config(function ($routeProvider, $windowProvider, $locationPro
             templateUrl: '../Views/Error/naoEncontrado.html',
             controller: 'errorController'
         })
-        .when('/estatistica', {
-            templateUrl: '../Views/Estatistica/index.html',
-            controller: 'estatisticaController'
-        })
         .otherwise({
             redirectTo: '/naoEncontrado'
         });
@@ -184,7 +180,6 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         $scope.menuColaborador = $scope.usuarioLogado.Perfil == 'COLABORADOR' || $scope.usuarioLogado.Perfil == 'GESTOR' ? '/#!/colaborador/' : '';
         $scope.menuSolicitarViagem = $scope.usuarioLogado.Perfil == 'COLABORADOR' || $scope.usuarioLogado.Perfil == 'GESTOR' ? '/#!/solicitarViagem/' : '';
         $scope.menuSair = $scope.usuarioLogado.Id >= 0 ? "/#!/?sair" : '';
-        $scope.menuEstatistica = $scope.usuarioLogado.Perfil == 'GESTOR' ? '/#!/estatistica/' : '';
     }
 
     /* Funções de pesquisa compartilhadas */
@@ -1368,20 +1363,6 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                 reverse: true
             });
         });
-    }
-});
-
-projetoIntegrador.controller('estatisticaController', function ($scope, $http, toastr){
-
-    if ($scope.ValidarLogin()) {
-
-
-        function Limpar()
-        {
-            
-        }
-
-        Limpar();
     }
 });
 
