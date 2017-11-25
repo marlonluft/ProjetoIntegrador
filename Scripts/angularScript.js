@@ -61,55 +61,71 @@ projetoIntegrador.config(function ($routeProvider, $windowProvider, $locationPro
 // CONTROLLERs
 projetoIntegrador.controller('mainController', function ($scope, $window, $http, toastr) {
 
-    $scope.Redirecionar = function(url)
-    {
+    $scope.Redirecionar = function (url) {
         $('html, body').animate({ scrollTop: 0 }, 'swing');
         $window.location.href = url;
     }
 
-    $scope.CoresStatus = function(status, solicitacaoStatus)
-    {
-        if ((status == 1 && solicitacaoStatus == 2) || (status == 4 && solicitacaoStatus == 5))
-        {
+    $scope.CoresStatus = function (status, solicitacaoStatus) {
+        if ((status == 1 && solicitacaoStatus == 2) || (status == 4 && solicitacaoStatus == 5)) {
             // reprovado solicitação viagem / custos
             return "#c7383c";
         }
-        else if (status < solicitacaoStatus || (status == 6 && solicitacaoStatus == 6))
-        {
+        else if (status < solicitacaoStatus || (status == 6 && solicitacaoStatus == 6)) {
             return "#0c7cd5";
         }
-        else if (status === solicitacaoStatus)
-        {
+        else if (status === solicitacaoStatus) {
             return "#585858";
         }
-        else
-        {
+        else {
             return "#8ec6f3";
         }
     }
 
-    $scope.IconeStatus = function(status, solicitacaoStatus, padrao)
-    {
-        if ((status == 1 && solicitacaoStatus == 2) || (status == 4 && solicitacaoStatus == 5))
-        {
+    $scope.IconeStatus = function (status, solicitacaoStatus, padrao) {
+        if ((status == 1 && solicitacaoStatus == 2) || (status == 4 && solicitacaoStatus == 5)) {
             // reprovado solicitação viagem / custos
             return "fa-times";
         }
-        else if (status < solicitacaoStatus || (status == 6 && solicitacaoStatus == 6))
-        {
+        else if (status < solicitacaoStatus || (status == 6 && solicitacaoStatus == 6)) {
             return "fa-check";
         }
-        else
-        {
+        else {
             return padrao;
         }
     }
 
+    $scope.ValidarAcesso = function (data) {
+        // Realiza a validação do sresponse do $http para verificar se o acesso do usuário é válido.
+        var acessoValido = false;
+
+        if (data == null || typeof data == 'undefined') {
+            toastr.error('Validação de acesso', 'Objeto de resposta nulo.');
+        }
+        else if (data.AcessoValido == null || typeof data.AcessoValido == 'undefined') {
+            toastr.error('Validação de acesso', 'Objeto de acesso inválido.');
+        }
+        else if (!data.AcessoValido) {
+            toastr.error('Acesso inválido', 'Redirecionando para a tela de login.');
+        }
+        else {
+            acessoValido = true;
+        }
+
+        if (acessoValido) {
+            return true;
+        }
+        else {
+            // Se acesso não é válido redireciona para o login
+            $scope.Redirecionar($scope.menuLogin);
+            return false;
+        }
+    }
+
     $scope.ValidarLogin = function () {
-        if ($scope.usuarioLogado == null ||
-            typeof $scope.usuarioLogado == 'undefined' ||
-            $scope.usuarioLogado.Id < 0) 
-        {
+        if (typeof $scope.usuarioLogado == 'undefined' ||
+            $scope.usuarioLogado == null ||
+            $scope.usuarioLogado.Id < 0) {
             $scope.Redirecionar($scope.menuLogin);
             return false;
         }
@@ -125,21 +141,17 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         $scope.UsuarioNome = '';
 
         // Verifica se está carregando o site (acabou de entrar)
-        if (window.localStorage.getItem('carregandoMain') == '1')
-        {            
+        if (window.localStorage.getItem('carregandoMain') == '1') {
             window.localStorage.setItem('carregandoMain', '0');
 
             var objUsuario = LoginGet();
-            if (typeof objUsuario != 'undefined' && objUsuario != null)
-            {
+            if (typeof objUsuario != 'undefined' && objUsuario != null) {
                 usuario = angular.copy(objUsuario);
 
-                if (usuario.Perfil === 'GESTOR')
-                {
+                if (usuario.Perfil === 'GESTOR') {
                     window.localStorage.setItem('PerfilGestor', 1);
                 }
-                else
-                {
+                else {
                     window.localStorage.setItem('PerfilGestor', 0);
                 }
             }
@@ -149,7 +161,8 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
             $scope.usuarioLogado = {
                 Id: -1,
                 Perfil: '',
-                Logado: false
+                Logado: false,
+                AcessoId: -1
             }
 
             LoginSet(null);
@@ -157,7 +170,8 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
             $scope.usuarioLogado = {
                 Id: typeof usuario.Id != 'undefined' ? usuario.Id : -1,
                 Perfil: typeof usuario.Perfil != 'undefined' ? usuario.Perfil : '',
-                Logado: true
+                Logado: true,
+                AcessoId: usuario.AcessoId
             }
 
             LoginSet(angular.copy($scope.usuarioLogado));
@@ -184,13 +198,21 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
 
     /* Funções de pesquisa compartilhadas */
     $scope.BuscarSetores = function () {
+        var acesso = {
+            IdAcesso: $scope.usuarioLogado.AcessoId,
+            UsuarioId: $scope.usuarioLogado.Id
+        };
+
         $http({
             method: 'POST',
             url: caminhoApi + '/setor/listar',
+            data: JSON.stringify(acesso),
             headers: {
                 'Content-Type': "application/json; charset=utf-8"
             }
         }).then(function (response) {
+            if ($scope.ValidarAcesso(response)) {
+
                 var data = response.data;
 
                 if (data.Sucesso) {
@@ -198,29 +220,36 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                 } else {
                     toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de setores, tente novamente.');
                 }
-            },
+            }
+        },
             function (response) {
                 toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de setores, tente novamente.');
             });
     }
 
     $scope.BuscarUsuarios = function () {
+
+        var acesso = {
+            IdAcesso: $scope.usuarioLogado.AcessoId,
+            UsuarioId: $scope.usuarioLogado.Id
+        };
+
         $http({
             method: 'POST',
             url: caminhoApi + '/usuario/listar',
+            data: JSON.stringify(acesso),
             headers: {
                 'Content-Type': "application/json; charset=utf-8"
             }
         }).then(function (response) {
+            if ($scope.ValidarAcesso(response)) {
                 var data = response.data;
 
                 if (data.Sucesso) {
 
-                    for (var x = 0; x < data.Lista.length; x++)
-                    {
+                    for (var x = 0; x < data.Lista.length; x++) {
                         // usuário logado não pode ser removido.
-                        if (data.Lista[x].CPF === window.localStorage.getItem('cpf'))
-                        {
+                        if (data.Lista[x].CPF === window.localStorage.getItem('cpf')) {
                             data.Lista[x].PodeRemover = false;
                             break;
                         }
@@ -230,20 +259,29 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                 } else {
                     toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de usuários, tente novamente.');
                 }
-            },
+            }
+        },
             function (response) {
                 toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao atualizar a lista de usuários, tente novamente.');
             });
     }
 
     $scope.BuscarGestores = function () {
+
+        var acesso = {
+            IdAcesso: $scope.usuarioLogado.AcessoId,
+            UsuarioId: $scope.usuarioLogado.Id
+        };
+
         $http({
             method: 'POST',
             url: caminhoApi + '/usuario/listarGestores',
+            data: JSON.stringify(acesso),
             headers: {
                 'Content-Type': "application/json; charset=utf-8"
             }
         }).then(function (response) {
+            if ($scope.ValidarAcesso(response)) {
                 var data = response.data;
 
                 if (data.Sucesso) {
@@ -251,7 +289,8 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                 } else {
                     toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de gestores, tente novamente.');
                 }
-            },
+            }
+        },
             function (response) {
                 toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao atualizar a lista de gestores, tente novamente.');
             });
@@ -261,19 +300,24 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
 
         SolicitacaoSet(null);
 
+        var acesso = {
+            IdAcesso: $scope.usuarioLogado.AcessoId,
+            UsuarioId: $scope.usuarioLogado.Id
+        };
+
         $http({
             method: 'POST',
             url: caminhoApi + '/solicitacao/listar',
-            data: JSON.stringify($scope.usuarioLogado.Id),
+            data: JSON.stringify(acesso),
             headers: {
                 'Content-Type': "application/json; charset=utf-8"
             }
         }).then(function (response) {
+            if ($scope.ValidarAcesso(response)) {
                 var data = response.data;
 
                 if (data.Sucesso) {
-                    for (var i = 0; i < data.Lista.length; i++) 
-                    {
+                    for (var i = 0; i < data.Lista.length; i++) {
                         if (typeof data.Lista[i].Custos != 'undefined' && data.Lista[i].Custos != null) {
                             for (var x = 0; x < data.Lista[i].Custos.length; x++) {
                                 data.Lista[i].Custos[x].Ordem = x;
@@ -284,265 +328,249 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
 
                     $scope.ListaSolicitacoes = data.Lista;
 
-                    if ($('.modal-backdrop.in').length > 0)
-                    {
+                    if ($('.modal-backdrop.in').length > 0) {
                         $('.modal-backdrop.in').hide();
-                        $('.modal-open').css('overflow','auto');
-                    }                    
+                        $('.modal-open').css('overflow', 'auto');
+                    }
                 } else {
                     $scope.ListaSolicitacoes = [];
                     toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de solicitações, tente novamente.');
 
-                    if ($('.modal-backdrop.in').length > 0)
-                    {
+                    if ($('.modal-backdrop.in').length > 0) {
                         $('.modal-backdrop.in').hide();
-                        $('.modal-open').css('overflow','auto');
-                    } 
+                        $('.modal-open').css('overflow', 'auto');
+                    }
                 }
-            },
+            }
+        },
             function (response) {
                 toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao atualizar a lista de solicitações, tente novamente.');
 
-                if ($('.modal-backdrop.in').length > 0)
-                {
+                if ($('.modal-backdrop.in').length > 0) {
                     $('.modal-backdrop.in').hide();
-                    $('.modal-open').css('overflow','auto');
-                } 
+                    $('.modal-open').css('overflow', 'auto');
+                }
             });
     }
     /* FIM Funções de pesquisa compartilhadas */
 
     $scope.SalvarSolicitacao = function (solicitacao, status) {
-        
-                    /* status define o status a ser setado para a solicitação de viagem
-                        0 = EmAberto,
-                        1 = AGUARDANDO_APROVACAO_VIAGEM,
-                        2 = (Aprovar)EM_ABERTO_CONTAS - FINALIZADO,
-                        3 = (Reprovar)RECUSADO_VIAGEM - RECUSADO_CONTAS,
-                        4 = AGUARDANDO_APROVACAO_CONTAS*/
-        
-                    // Realiza a ação de salvar e enviar para aprovação.
-                    if (validarSolicitacao(solicitacao, status > 0)) {
-                        var solViagem = angular.copy(solicitacao);
-        
-                        solViagem.DataIdaS = solViagem.DataIda;
-                        solViagem.DataIda = null;
-        
-                        solViagem.DataVoltaS = solViagem.DataVolta;
-                        solViagem.DataVolta = null;
-        
-                        for (var i = 0; i < solViagem.Custos.length; i++) {
 
-                            if (solViagem.Status === 3 && typeof solViagem.Custos[i].ValorPrestado != "number")
-                            {
-                                var valor = solViagem.Custos[i].ValorPrestado.replace(",", ".");
+        /* status define o status a ser setado para a solicitação de viagem
+            0 = EmAberto,
+            1 = AGUARDANDO_APROVACAO_VIAGEM,
+            2 = (Aprovar)EM_ABERTO_CONTAS - FINALIZADO,
+            3 = (Reprovar)RECUSADO_VIAGEM - RECUSADO_CONTAS,
+            4 = AGUARDANDO_APROVACAO_CONTAS*/
 
-                                solViagem.Custos[i].ValorPrestado = parseFloat(valor);
-                            }
+        // Realiza a ação de salvar e enviar para aprovação.
+        if (validarSolicitacao(solicitacao, status > 0)) {
+            var solViagem = angular.copy(solicitacao);
 
-                            if (typeof solViagem.Custos[i].Id == 'undefined' || solViagem.Custos[i].Id < 0)                    
-                            {
-                                solViagem.Custos[i].TipoI = solViagem.Custos[i].Tipo;
-                            }                    
-                        }
-        
-        
-                        solViagem.EnviarAprovacao = false;
-                        solViagem.Aprovado = false;
-                        solViagem.AprovadoCustos = false;
-                        solViagem.Reprovado = false;
-                        solViagem.ReprovadoCustos = false;
-                        solViagem.EnviarAprovacaoCustos = false;
-        
-                        if (solViagem.Status == 0 && status == 2)
-                        {
-                            // Não salvou solicitação, mandou direto para aprovação.
-                            status = 1;
-                        }
-        
-                        if (solViagem.Status == 3 && status == 2)
-                        {
-                            // Enviado para aprovação de custos
-                            status = 4;
-                        }
-        
-                        switch (status)
-                        {
+            solViagem.DataIdaS = solViagem.DataIda;
+            solViagem.DataIda = null;
+
+            solViagem.DataVoltaS = solViagem.DataVolta;
+            solViagem.DataVolta = null;
+
+            for (var i = 0; i < solViagem.Custos.length; i++) {
+
+                if (solViagem.Status === 3 && typeof solViagem.Custos[i].ValorPrestado != "number") {
+                    var valor = solViagem.Custos[i].ValorPrestado.replace(",", ".");
+
+                    solViagem.Custos[i].ValorPrestado = parseFloat(valor);
+                }
+
+                if (typeof solViagem.Custos[i].Id == 'undefined' || solViagem.Custos[i].Id < 0) {
+                    solViagem.Custos[i].TipoI = solViagem.Custos[i].Tipo;
+                }
+            }
+
+
+            solViagem.EnviarAprovacao = false;
+            solViagem.Aprovado = false;
+            solViagem.AprovadoCustos = false;
+            solViagem.Reprovado = false;
+            solViagem.ReprovadoCustos = false;
+            solViagem.EnviarAprovacaoCustos = false;
+
+            if (solViagem.Status == 0 && status == 2) {
+                // Não salvou solicitação, mandou direto para aprovação.
+                status = 1;
+            }
+
+            if (solViagem.Status == 3 && status == 2) {
+                // Enviado para aprovação de custos
+                status = 4;
+            }
+
+            switch (status) {
+                case 0:
+                    // Seta o usuário logado como o dono da solicitação.
+                    solViagem.IdUsuario = $scope.usuarioLogado.Id;
+                    break;
+                case 1:
+                    solViagem.EnviarAprovacao = true;
+                    break;
+                case 2:
+                    if (solViagem.Status == 1) {
+                        // EM_ABERTO_CONTAS
+                        solViagem.Aprovado = true;
+                    }
+                    else {
+                        // FINALIZADO
+                        solViagem.AprovadoCustos = true;
+                    }
+                    break;
+                case 3:
+                    if (solViagem.Status == 1) {
+                        // RECUSADO_VIAGEM
+                        solViagem.Reprovado = true;
+                    }
+                    else {
+                        // RECUSADO_CONTAS
+                        solViagem.ReprovadoCustos = true;
+                    }
+                    break;
+                case 4:
+                    solViagem.EnviarAprovacaoCustos = true;
+                    break;
+            }
+
+            solViagem.IdAcesso = $scope.usuarioLogado.AcessoId;
+            solViagem.UsuarioId = $scope.usuarioLogado.Id;
+
+            $http({
+                method: 'POST',
+                url: caminhoApi + '/solicitacao/salvar',
+                headers: {
+                    'Content-Type': "application/json; charset=utf-"
+                },
+                data: JSON.stringify(solViagem)
+            }).then(function (response) {
+                if ($scope.ValidarAcesso(response)) {
+                    var data = response.data;
+
+                    if (data.Sucesso) {
+
+                        var msg = '';
+                        switch (status) {
                             case 0:
-                                // Seta o usuário logado como o dono da solicitação.
-                                solViagem.IdUsuario = $scope.usuarioLogado.Id;
+                                msg = 'Solicitação de viagem e prestação de custos salvos com sucesso!';
                                 break;
                             case 1:
-                                solViagem.EnviarAprovacao = true;
+                                msg = 'Solicitação de viagem enviada para aprovação!';
                                 break;
                             case 2:
-                                if (solViagem.Status == 1)
-                                {
-                                    // EM_ABERTO_CONTAS
-                                    solViagem.Aprovado = true;
+                                if (solViagem.Status == 1) {
+                                    msg = 'Solicitação de viagem aprovada com sucesso!';
                                 }
-                                else
-                                {
-                                    // FINALIZADO
-                                    solViagem.AprovadoCustos = true;
+                                else {
+                                    msg = 'Prestação de custos aprovados com sucesso!';
                                 }
                                 break;
                             case 3:
-                                if (solViagem.Status == 1)
-                                {
-                                    // RECUSADO_VIAGEM
-                                    solViagem.Reprovado = true;
+                                if (solViagem.Status == 1) {
+                                    msg = 'Solicitação de viagem recusada com sucesso!';
                                 }
-                                else
-                                {
-                                    // RECUSADO_CONTAS
-                                    solViagem.ReprovadoCustos = true;
+                                else {
+                                    msg = 'Prestação de custos recusados com sucesso!';
                                 }
                                 break;
                             case 4:
-                                solViagem.EnviarAprovacaoCustos = true;
+                                msg = 'Prestação de custos enviados para aprovação!';
                                 break;
                         }
-        
-                        $http({
-                            method: 'POST',
-                            url: caminhoApi + '/solicitacao/salvar',
-                            headers: {
-                                'Content-Type': "application/json; charset=utf-"
-                            },
-                            data: JSON.stringify(solViagem)
-                        }).then(function (response) {
-                                var data = response.data;
-        
-                                if (data.Sucesso) {
-        
-                                    var msg = '';
-                                    switch (status)
-                                    {
-                                        case 0:
-                                            msg = 'Solicitação de viagem e prestação de custos salvos com sucesso!';
-                                            break;
-                                        case 1:
-                                            msg = 'Solicitação de viagem enviada para aprovação!';
-                                            break;
-                                        case 2:
-                                            if (solViagem.Status == 1)
-                                            {
-                                                msg = 'Solicitação de viagem aprovada com sucesso!';
-                                            }
-                                            else
-                                            {
-                                                msg = 'Prestação de custos aprovados com sucesso!';
-                                            }
-                                            break;
-                                        case 3:
-                                            if (solViagem.Status == 1)
-                                            {
-                                                msg = 'Solicitação de viagem recusada com sucesso!';
-                                            }
-                                            else
-                                            {
-                                                msg = 'Prestação de custos recusados com sucesso!';
-                                            }
-                                            break;
-                                        case 4:
-                                            msg = 'Prestação de custos enviados para aprovação!';
-                                            break;
-                                    }
-        
-                                    toastr.success(msg);
-                                    $scope.Redirecionar($scope.menuColaborador);
-                                } else {
-                                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao realizar a ação, tente novamente.');
-                                }
-                            },
-                            function (response) {
-                                toastr.error('Falha ao realizar a ação, tente novamente.');
-                            });
+
+                        toastr.success(msg);
+                        $scope.Redirecionar($scope.menuColaborador);
+                    } else {
+                        toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao realizar a ação, tente novamente.');
                     }
                 }
+            },
+                function (response) {
+                    toastr.error('Falha ao realizar a ação, tente novamente.');
+                });
+        }
+    }
 
-                function validarSolicitacao(solicitacao, envioAprovacao) {
-                    if (typeof envioAprovacao == 'undefined' || envioAprovacao == null) {
-                        envioAprovacao = true;
-                    }
-        
-                    var dataAtual = new Date();
+    function validarSolicitacao(solicitacao, envioAprovacao) {
+        if (typeof envioAprovacao == 'undefined' || envioAprovacao == null) {
+            envioAprovacao = true;
+        }
 
-                    if (typeof solicitacao == 'undefined' || solicitacao == null) {
-                        toastr.error('Objeto de solicitação de viagem vazio.');
-                        return false;
-                    } else if (typeof solicitacao.UfOrigem == 'undefined' || solicitacao.UfOrigem == null || solicitacao.UfOrigem.length == 0) {
-                        toastr.error("Campo 'UF Origem' inválido.");
-                        return false;
-                    } else if (solicitacao.UfOrigem.length > 2) {
-                        toastr.error("Campo 'UF Origem' maior que 2 caracteres.");
-                        return false;
-                    } else if (typeof solicitacao.CidadeOrigem == 'undefined' || solicitacao.CidadeOrigem == null || solicitacao.CidadeOrigem.length == 0) {
-                        toastr.error("Campo 'Origem' inválido.");
-                        return false;
-                    } else if (solicitacao.CidadeOrigem.length > 255) {
-                        toastr.error("Campo 'Origem' maior que 255 caracteres.");
-                        return false;
-                    } else if (typeof solicitacao.UfDestino == 'undefined' || solicitacao.UfDestino == null || solicitacao.UfDestino.length == 0) {
-                        toastr.error("Campo 'UF Destino' inválido.");
-                        return false;
-                    } else if (solicitacao.UfDestino.length > 2) {
-                        toastr.error("Campo 'UF Destino' maior que 2 caracteres.");
-                        return false;
-                    } else if (typeof solicitacao.CidadeDestino == 'undefined' || solicitacao.CidadeDestino == null || solicitacao.CidadeDestino.length == 0) {
-                        toastr.error("Campo 'Destino' inválido.");
-                        return false;
-                    } else if (solicitacao.CidadeDestino.length > 255) {
-                        toastr.error("Campo 'Destino' maior que 255 caracteres.");
-                        return false;
-                    } else if (typeof solicitacao.DataIda == 'undefined' || solicitacao.DataIda == null || solicitacao.DataIda.length == 0) {
-                        toastr.error("Campo 'Data Ida' inválido.");
-                        return false;
-                    }
-                    else if (solicitacao.Status == 0 && solicitacao.DataIda.getTime() < dataAtual.setHours(0,0,0,0))
-                    {
-                        toastr.error("Campo 'Data Ida' deve ser maior ou igual a data de hoje.");
-                        return false;
-                    } else if (typeof solicitacao.DataVolta == 'undefined' || solicitacao.DataVolta == null || solicitacao.DataVolta.length == 0) {
-                        toastr.error("Campo 'Data Volta' inválido.");
-                        return false;
-                    } else if (typeof solicitacao.Motivo == 'undefined' || solicitacao.Motivo == null || solicitacao.Motivo.length == 0 || solicitacao.Motivo == "0") {
-                        toastr.error("Campo 'Motivo' inválido.");
-                        return false;
-                    } else if (solicitacao.Motivo.length > 255) {
-                        toastr.error("Campo 'Motivo' maior que 255 caracteres.");
-                        return false;
-                    } else if (typeof solicitacao.Observacao != 'undefined' && solicitacao.Observacao != null && solicitacao.Observacao.length > 255) {
-                        toastr.error("Campo 'Observação' maior que 255 caracteres.");
-                        return false;
-                    } else if (envioAprovacao) 
-                    {
-                        if (typeof solicitacao.Custos == 'undefined' || solicitacao.Custos == null || solicitacao.Custos.length == 0)
-                        {
-                            toastr.error("Favor informar prestação de custos da viagem.");
-                            return false;
-                        }
+        var dataAtual = new Date();
 
-                        for (var x = 0; x < solicitacao.Custos.length; x++)
-                        {
-                            if (
-                                (solicitacao.Custos[x].ValorSolicitado < 1 && solicitacao.Status == 0) || 
-                                (solicitacao.Status === 3 && 
-                                (typeof solicitacao.Custos[x].ValorPrestado == 'undefined' || 
-                                    solicitacao.Custos[x].ValorPrestado == null || 
-                                    solicitacao.Custos[x].ValorPrestado.length == 0))
-                               )
-                            {
-                                toastr.error("Um ou mais valores de prestação de custos está(ão) com o valor abaixo de R$ 1,00 verifique.");
-                                return false;
-                            }
-                        }
-                        
-                    }
-        
-                    return true;
+        if (typeof solicitacao == 'undefined' || solicitacao == null) {
+            toastr.error('Objeto de solicitação de viagem vazio.');
+            return false;
+        } else if (typeof solicitacao.UfOrigem == 'undefined' || solicitacao.UfOrigem == null || solicitacao.UfOrigem.length == 0) {
+            toastr.error("Campo 'UF Origem' inválido.");
+            return false;
+        } else if (solicitacao.UfOrigem.length > 2) {
+            toastr.error("Campo 'UF Origem' maior que 2 caracteres.");
+            return false;
+        } else if (typeof solicitacao.CidadeOrigem == 'undefined' || solicitacao.CidadeOrigem == null || solicitacao.CidadeOrigem.length == 0) {
+            toastr.error("Campo 'Origem' inválido.");
+            return false;
+        } else if (solicitacao.CidadeOrigem.length > 255) {
+            toastr.error("Campo 'Origem' maior que 255 caracteres.");
+            return false;
+        } else if (typeof solicitacao.UfDestino == 'undefined' || solicitacao.UfDestino == null || solicitacao.UfDestino.length == 0) {
+            toastr.error("Campo 'UF Destino' inválido.");
+            return false;
+        } else if (solicitacao.UfDestino.length > 2) {
+            toastr.error("Campo 'UF Destino' maior que 2 caracteres.");
+            return false;
+        } else if (typeof solicitacao.CidadeDestino == 'undefined' || solicitacao.CidadeDestino == null || solicitacao.CidadeDestino.length == 0) {
+            toastr.error("Campo 'Destino' inválido.");
+            return false;
+        } else if (solicitacao.CidadeDestino.length > 255) {
+            toastr.error("Campo 'Destino' maior que 255 caracteres.");
+            return false;
+        } else if (typeof solicitacao.DataIda == 'undefined' || solicitacao.DataIda == null || solicitacao.DataIda.length == 0) {
+            toastr.error("Campo 'Data Ida' inválido.");
+            return false;
+        }
+        else if (solicitacao.Status == 0 && solicitacao.DataIda.getTime() < dataAtual.setHours(0, 0, 0, 0)) {
+            toastr.error("Campo 'Data Ida' deve ser maior ou igual a data de hoje.");
+            return false;
+        } else if (typeof solicitacao.DataVolta == 'undefined' || solicitacao.DataVolta == null || solicitacao.DataVolta.length == 0) {
+            toastr.error("Campo 'Data Volta' inválido.");
+            return false;
+        } else if (typeof solicitacao.Motivo == 'undefined' || solicitacao.Motivo == null || solicitacao.Motivo.length == 0 || solicitacao.Motivo == "0") {
+            toastr.error("Campo 'Motivo' inválido.");
+            return false;
+        } else if (solicitacao.Motivo.length > 255) {
+            toastr.error("Campo 'Motivo' maior que 255 caracteres.");
+            return false;
+        } else if (typeof solicitacao.Observacao != 'undefined' && solicitacao.Observacao != null && solicitacao.Observacao.length > 255) {
+            toastr.error("Campo 'Observação' maior que 255 caracteres.");
+            return false;
+        } else if (envioAprovacao) {
+            if (typeof solicitacao.Custos == 'undefined' || solicitacao.Custos == null || solicitacao.Custos.length == 0) {
+                toastr.error("Favor informar prestação de custos da viagem.");
+                return false;
+            }
+
+            for (var x = 0; x < solicitacao.Custos.length; x++) {
+                if (
+                    (solicitacao.Custos[x].ValorSolicitado < 1 && solicitacao.Status == 0) ||
+                    (solicitacao.Status === 3 &&
+                        (typeof solicitacao.Custos[x].ValorPrestado == 'undefined' ||
+                            solicitacao.Custos[x].ValorPrestado == null ||
+                            solicitacao.Custos[x].ValorPrestado.length == 0))
+                ) {
+                    toastr.error("Um ou mais valores de prestação de custos está(ão) com o valor abaixo de R$ 1,00 verifique.");
+                    return false;
                 }
+            }
+
+        }
+
+        return true;
+    }
 
     function Limpar() {
 
@@ -555,7 +583,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         $scope.Setores = [];
         $scope.ListaGestores = [];
         $scope.ListaSolicitacoes = [];
-        
+
         //window.localStorage.setItem('PerfilGestor', 0);
         $scope.ufLista = ['AC', 'AL', 'AM', 'AP', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MG', 'MS', 'MT', 'PA', 'PB', 'PE', 'PI', 'PR', 'RJ', 'RN', 'RO', 'RR', 'RS', 'SC', 'SE', 'SP', 'TO'];
         window.localStorage.setItem('Solicitacao', null);
@@ -591,20 +619,21 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
 
         $scope.UsuarioNome = '';
 
-            if (ValidarLogin(login)) {
-                var model = {
-                    CPF: login.cpf,
-                    Senha: login.senha
-                };
+        if (ValidarLogin(login)) {
+            var model = {
+                CPF: login.cpf,
+                Senha: login.senha
+            };
 
-                $http({
-                    method: 'POST',
-                    url: caminhoApi + '/usuario/logar',
-                    headers: {
-                        'Content-Type': "application/json; charset=utf-"
-                    },
-                    data: JSON.stringify(model)
-                }).then(function (response) {
+            $http({
+                method: 'POST',
+                url: caminhoApi + '/usuario/logar',
+                headers: {
+                    'Content-Type': "application/json; charset=utf-"
+                },
+                data: JSON.stringify(model)
+            }).then(function (response) {
+                if ($scope.ValidarAcesso(response)) {
                     var data = response.data;
 
                     if (data.Sucesso) {
@@ -628,13 +657,13 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                                 $scope.Redirecionar($scope.menuColaborador);
                                 break;
 
-                                // Gestor
+                            // Gestor
                             case 'GESTOR':
                                 window.localStorage.setItem('PerfilGestor', 1);
                                 $scope.Redirecionar($scope.menuGestor);
                                 break;
 
-                                // Admin
+                            // Admin
                             default:
                             case 'ADMINISTRADOR':
                                 $scope.Redirecionar($scope.menuUsuario);
@@ -646,11 +675,11 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                     } else {
                         toastr.error(data.Mensagem);
                     }
-
-                }, function (response) {
-                    toastr.error('Falha ao realizar a ação, tente novamente.');
-                });
-            }
+                }
+            }, function (response) {
+                toastr.error('Falha ao realizar a ação, tente novamente.');
+            });
+        }
     }
 
     function ValidarLogin(login) {
@@ -723,25 +752,23 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
         $scope.enviarAprovacao = function (model) {
             $('#modalEnviarAprovacao').modal('show');
         }
-        
+
         $scope.confirmarReprovarSolicitacaoViagem = function () {
-            
-            if (typeof $scope.Solicitacao.Justificativa == 'undefined' || $scope.Solicitacao.Justificativa == null || $scope.Solicitacao.Justificativa.length <= 0)
-            {
-                toastr.error('Favor informar uma justificativa.');                
+
+            if (typeof $scope.Solicitacao.Justificativa == 'undefined' || $scope.Solicitacao.Justificativa == null || $scope.Solicitacao.Justificativa.length <= 0) {
+                toastr.error('Favor informar uma justificativa.');
             }
-            else
-            {
+            else {
                 $('#modalReprovar').modal('hide');
                 $scope.enviarSalvar(3);
             }
         }
 
-        $scope.enviarSalvar = function (status) {            
+        $scope.enviarSalvar = function (status) {
             $scope.SalvarSolicitacao($scope.Solicitacao, status);
         }
 
-        
+
         $scope.adicionarPrestacaoConta = function (prestacao) {
 
             if (typeof prestacao == 'undefined' || prestacao == null) {
@@ -760,15 +787,13 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
                 var valor = obj.Valor.replace(".", "");
                 valor = valor.replace(",", ".");
 
-                if ($scope.Solicitacao.Status == 0)
-                {
+                if ($scope.Solicitacao.Status == 0) {
                     obj.ValorSolicitado = valor;
 
                     // Não é nova prestação pois ainda está provendo os custos que serão realizados.
                     obj.NovaPrestacao = false;
                 }
-                else
-                {
+                else {
                     obj.ValorSolicitado = 0;
                     obj.ValorPrestado = valor;
 
@@ -796,21 +821,18 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
             return obj.text;
         }
 
-        $scope.recuperarTotalPrestacaoContas = function() {
+        $scope.recuperarTotalPrestacaoContas = function () {
             var totalS = 0;
             var totalP = 0;
 
             $scope.Solicitacao.Custos.forEach(function (element) {
                 totalS = totalS + (parseInt(element.Quantidade) * parseFloat(element.ValorSolicitado));
 
-                try
-                {
+                try {
                     var valorPrestado = angular.copy(element.ValorPrestado);
 
-                    if (typeof(valorPrestado) === 'string')
-                    {
-                        if (valorPrestado.indexOf(".") > 0 && valorPrestado.indexOf(",") > 0)
-                        {
+                    if (typeof (valorPrestado) === 'string') {
+                        if (valorPrestado.indexOf(".") > 0 && valorPrestado.indexOf(",") > 0) {
                             valorPrestado = valorPrestado.replace(".", "");
                         }
 
@@ -819,8 +841,7 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
 
                     totalP = totalP + (parseInt(element.Quantidade) * parseFloat(valorPrestado));
                 }
-                catch(ex)
-                {
+                catch (ex) {
                     totalP = totalP + 0;
                 }
             }, this);
@@ -834,12 +855,10 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
             // Custo total resultado solicitado - prestado
             $scope.CustoResultado = (totalS - totalP);
 
-            if ($scope.CustoResultado === 0)
-            {
+            if ($scope.CustoResultado === 0) {
                 $scope.ResultadoCor = "#000";
             }
-            else
-            {
+            else {
                 $scope.ResultadoCor = $scope.CustoResultado < 0 ? "#e80000" : "#00c33e";
             }
 
@@ -873,14 +892,22 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
         }
 
         $scope.confirmarRemoverSolicitacao = function () {
+
+            var parametros = {
+                IdAcesso: $scope.usuarioLogado.AcessoId,
+                UsuarioId: $scope.usuarioLogado.Id,
+                id: $scope.Solicitacao.Id.toString()
+            };
+
             $http({
                 method: 'POST',
                 url: caminhoApi + '/solicitacao/remover',
-                data: JSON.stringify($scope.Solicitacao.Id.toString()),
+                data: JSON.stringify(parametros),
                 headers: {
                     'Content-Type': "application/json; charset=utf-8"
                 }
             }).then(function (response) {
+                if ($scope.ValidarAcesso(response)) {
                     var data = response.data;
 
                     if (data.Sucesso) {
@@ -891,7 +918,8 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
                     } else {
                         toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover a solicitação de viagem, tente novamente.');
                     }
-                },
+                }
+            },
                 function (response) {
                     toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao remover a solicitação de viagem, tente novamente.');
                 });
@@ -914,11 +942,9 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
             $scope.EditarContas = false;
             $scope.PerfilGestor = window.localStorage.getItem('PerfilGestor') == 1;
 
-            switch ($scope.Solicitacao.Status)
-            {
+            switch ($scope.Solicitacao.Status) {
                 case 3:
-                    if (!$scope.PerfilGestor)
-                    {
+                    if (!$scope.PerfilGestor) {
                         // Somente colaborador
                         $scope.EditarContas = true;
                     }
@@ -929,11 +955,10 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
                     break;
                 default:
                 case 0:
-                    if (typeof $scope.Solicitacao.Status == 'undefined' || $scope.Solicitacao.Status == null || $scope.Solicitacao.Status == 0)
-                    {
+                    if (typeof $scope.Solicitacao.Status == 'undefined' || $scope.Solicitacao.Status == null || $scope.Solicitacao.Status == 0) {
                         $scope.EditarViagem = true;
                         $scope.EditarContas = true;
-                    }                    
+                    }
                     break;
             }
         }
@@ -991,18 +1016,24 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
             }
         }
 
-        $scope.confirmarRemoverSolicitacao = function()
-        {
+        $scope.confirmarRemoverSolicitacao = function () {
             var solicitacaoObj = SolicitacaoGet();
+
+            var parametros = {
+                IdAcesso: $scope.usuarioLogado.AcessoId,
+                UsuarioId: $scope.usuarioLogado.Id,
+                id: solicitacaoObj.Id.toString()
+            };
 
             $http({
                 method: 'POST',
                 url: caminhoApi + '/solicitacao/remover',
-                data: JSON.stringify(solicitacaoObj.Id.toString()),
+                data: JSON.stringify(parametros),
                 headers: {
                     'Content-Type': "application/json; charset=utf-8"
                 }
             }).then(function (response) {
+                if ($scope.ValidarAcesso(response)) {
                     var data = response.data;
 
                     if (data.Sucesso) {
@@ -1013,7 +1044,8 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
                     } else {
                         toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover a solicitação de viagem, tente novamente.');
                     }
-                },
+                }
+            },
                 function (response) {
                     toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao remover a solicitação de viagem, tente novamente.');
                 });
@@ -1050,13 +1082,11 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
         }
 
         $scope.confirmarReprovarSolicitacaoViagem = function () {
-            
-            if (typeof $scope.Solicitacao.Justificativa == 'undefined' || $scope.Solicitacao.Justificativa == null || $scope.Solicitacao.Justificativa.length <= 0)
-            {
-                toastr.error('Favor informar uma justificativa.');                
+
+            if (typeof $scope.Solicitacao.Justificativa == 'undefined' || $scope.Solicitacao.Justificativa == null || $scope.Solicitacao.Justificativa.length <= 0) {
+                toastr.error('Favor informar uma justificativa.');
             }
-            else
-            {
+            else {
                 $('#modalReprovar').modal('hide');
                 $scope.SalvarSolicitacao($scope.Solicitacao, 3);
             }
@@ -1075,7 +1105,7 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
 
         function Limpar() {
             $scope.PerfilGestor = window.localStorage.getItem('PerfilGestor') == 1;
-            $scope.BuscarSolicitacoes();            
+            $scope.BuscarSolicitacoes();
         }
 
         Limpar();
@@ -1103,7 +1133,9 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
 
         $scope.ConfirmarRemover = function (id) {
             var model = {
-                Id: id
+                Id: id,
+                IdAcesso: $scope.usuarioLogado.AcessoId,
+                UsuarioId: $scope.usuarioLogado.Id
             }
 
             $http({
@@ -1114,6 +1146,7 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
                 },
                 data: JSON.stringify(model)
             }).then(function (response) {
+                if ($scope.ValidarAcesso(response)) {
                     var data = response.data;
 
                     if (data.Sucesso) {
@@ -1123,7 +1156,8 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
                     } else {
                         toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o setor, tente novamente.');
                     }
-                },
+                }
+            },
                 function (response) {
                     toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o setor, tente novamente.');
                 });
@@ -1131,6 +1165,10 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
 
         $scope.SalvarSetor = function (model) {
             if (ValidarSetor(model)) {
+
+                model.IdAcesso = $scope.usuarioLogado.AcessoId;
+                model.UsuarioId = $scope.usuarioLogado.Id;
+
                 $http({
                     method: 'POST',
                     url: caminhoApi + '/setor/manipular',
@@ -1139,6 +1177,7 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
                     },
                     data: JSON.stringify(model)
                 }).then(function (response) {
+                    if ($scope.ValidarAcesso(response)) {
                         var data = response.data;
 
                         if (data.Sucesso) {
@@ -1148,7 +1187,8 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
                         } else {
                             toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o setor, tente novamente.');
                         }
-                    },
+                    }
+                },
                     function (response) {
                         toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o setor, tente novamente.');
                     });
@@ -1217,7 +1257,9 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
         $scope.ConfirmarRemover = function (id) {
 
             var model = {
-                Id: id
+                Id: id,
+                IdAcesso: $scope.usuarioLogado.AcessoId,
+                UsuarioId: $scope.usuarioLogado.Id
             }
 
             $http({
@@ -1228,6 +1270,7 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                 },
                 data: JSON.stringify(model)
             }).then(function (response) {
+                if ($scope.ValidarAcesso(response)) {
                     var data = response.data;
 
                     if (data.Sucesso) {
@@ -1237,7 +1280,8 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                     } else {
                         toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o usuário, tente novamente.');
                     }
-                },
+                }
+            },
                 function (response) {
                     toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o usuário, tente novamente.');
                 });
@@ -1246,10 +1290,12 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
         $scope.SalvarUsuario = function (model) {
             if (ValidarUsuario(model)) {
 
-                if (model.Perfil === 'GESTOR' || model.Perfil === 'ADMINISTRADOR')
-                {
+                if (model.Perfil === 'GESTOR' || model.Perfil === 'ADMINISTRADOR') {
                     model.IdSetor = -1;
                 }
+
+                model.IdAcesso = $scope.usuarioLogado.AcessoId;
+                model.UsuarioId = $scope.usuarioLogado.Id;
 
                 $http({
                     method: 'POST',
@@ -1259,6 +1305,7 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                     },
                     data: JSON.stringify(model)
                 }).then(function (response) {
+                    if ($scope.ValidarAcesso(response)) {
                         var data = response.data;
 
                         if (data.Sucesso) {
@@ -1268,7 +1315,8 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                         } else {
                             toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o usuário, tente novamente.');
                         }
-                    },
+                    }
+                },
                     function (response) {
                         toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o usuário, tente novamente.');
                     });
