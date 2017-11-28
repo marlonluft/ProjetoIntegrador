@@ -59,7 +59,7 @@ projetoIntegrador.config(function ($routeProvider, $windowProvider, $locationPro
 });
 
 // CONTROLLERs
-projetoIntegrador.controller('mainController', function ($scope, $window, $http, toastr) {
+projetoIntegrador.controller('mainController', function ($scope, $window, $http, toastr, $timeout) {
 
     $scope.Redirecionar = function (url) {
         $('html, body').animate({ scrollTop: 0 }, 'swing');
@@ -103,13 +103,13 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         var acessoValido = false;
 
         if (data == null || typeof data == 'undefined') {
-            toastr.error('Validação de acesso', 'Objeto de resposta nulo.');
+            toastr.error('Objeto de resposta nulo.', 'Validação de acesso');
         }
         else if (data.AcessoValido == null || typeof data.AcessoValido == 'undefined') {
-            toastr.error('Validação de acesso', 'Objeto de acesso inválido.');
+            toastr.error('Objeto de acesso inválido.', 'Validação de acesso');
         }
         else if (!data.AcessoValido) {
-            toastr.error('Acesso inválido', 'Redirecionando para a tela de login.');
+            toastr.error('Redirecionando para a tela de login.', 'Acesso inválido');
         }
         else {
             acessoValido = true;
@@ -120,7 +120,9 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         }
         else {
             // Se acesso não é válido redireciona para o login
-            $scope.Redirecionar($scope.menuLogin);
+            $timeout(function (){
+                $scope.Redirecionar($scope.menuSair);
+            }, 500);            
             return false;
         }
     }
