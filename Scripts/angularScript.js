@@ -95,7 +95,10 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         }
     }
 
-    $scope.ValidarAcesso = function (data) {
+    $scope.ValidarAcesso = function (response) {
+
+        var data = response.data;
+
         // Realiza a validação do sresponse do $http para verificar se o acesso do usuário é válido.
         var acessoValido = false;
 
@@ -633,7 +636,6 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                 },
                 data: JSON.stringify(model)
             }).then(function (response) {
-                if ($scope.ValidarAcesso(response)) {
                     var data = response.data;
 
                     if (data.Sucesso) {
@@ -675,7 +677,6 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                     } else {
                         toastr.error(data.Mensagem);
                     }
-                }
             }, function (response) {
                 toastr.error('Falha ao realizar a ação, tente novamente.');
             });
