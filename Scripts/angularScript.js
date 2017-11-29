@@ -66,6 +66,26 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
         $window.location.href = url;
     }
 
+    $scope.ValidarMsgErro = function(response, mensagemPadrao){
+
+        if (response != null && typeof response != 'undefined' &&
+            response.data != null && typeof response.data != 'undefined' &&
+            response.data.Mensagem != null && typeof response.data.Mensagem != 'undefined' &&
+            response.data.Mensagem.length > 0)
+        {
+            toastr.error(response.data.Mensagem);
+        }
+        else
+        {
+            if (typeof mensagemPadrao === 'undefined' || mensagemPadrao == null)
+            {
+                mensagemPadrao = "Falha ao realizar a ação, Tente novamente.";
+            }
+
+            toastr.error(mensagemPadrao);
+        }
+    }
+
     $scope.CoresStatus = function (status, solicitacaoStatus) {
         if ((status == 1 && solicitacaoStatus == 2) || (status == 4 && solicitacaoStatus == 5)) {
             // reprovado solicitação viagem / custos
@@ -228,7 +248,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
             }
         },
             function (response) {
-                toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao atualizar a lista de setores, tente novamente.');
+                $scope.ValidarMsgErro(response,"Falha ao atualizar a lista de setores, tente novamente.");
             });
     }
 
@@ -267,7 +287,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
             }
         },
             function (response) {
-                toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao atualizar a lista de usuários, tente novamente.');
+                $scope.ValidarMsgErro(response,"Falha ao atualizar a lista de usuários, tente novamente.");
             });
     }
 
@@ -297,7 +317,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
             }
         },
             function (response) {
-                toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao atualizar a lista de gestores, tente novamente.');
+                $scope.ValidarMsgErro(response,"Falha ao atualizar a lista de gestores, tente novamente.");
             });
     }
 
@@ -349,7 +369,8 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
             }
         },
             function (response) {
-                toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao atualizar a lista de solicitações, tente novamente.');
+
+                $scope.ValidarMsgErro(response,"Falha ao atualizar a lista de solicitações, tente novamente.");
 
                 if ($('.modal-backdrop.in').length > 0) {
                     $('.modal-backdrop.in').hide();
@@ -495,7 +516,7 @@ projetoIntegrador.controller('mainController', function ($scope, $window, $http,
                 }
             },
                 function (response) {
-                    toastr.error('Falha ao realizar a ação, tente novamente.');
+                    $scope.ValidarMsgErro(response,"Falha ao salvar a solicitação, tente novamente.");
                 });
         }
     }
@@ -680,7 +701,7 @@ projetoIntegrador.controller('loginController', function ($scope, $window, $rout
                         toastr.error(data.Mensagem);
                     }
             }, function (response) {
-                toastr.error('Falha ao realizar a ação, tente novamente.');
+                $scope.ValidarMsgErro(response,"Falha ao realizar o login, tente novamente.");
             });
         }
     }
@@ -924,7 +945,7 @@ projetoIntegrador.controller('solicitacaoController', function ($scope, $window,
                 }
             },
                 function (response) {
-                    toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao remover a solicitação de viagem, tente novamente.');
+                    $scope.ValidarMsgErro(response,"Falha ao remover a solicitação de viagem, tente novamente.");
                 });
         }
 
@@ -1050,7 +1071,7 @@ projetoIntegrador.controller('colaboradorController', function ($scope, $window,
                 }
             },
                 function (response) {
-                    toastr.error(response.data.Mensagem.length > 0 ? response.data.Mensagem : 'Falha ao remover a solicitação de viagem, tente novamente.');
+                    $scope.ValidarMsgErro(response,"Falha ao remover a solicitação de viagem, tente novamente.");
                 });
         }
 
@@ -1162,7 +1183,7 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
                 }
             },
                 function (response) {
-                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o setor, tente novamente.');
+                    $scope.ValidarMsgErro(response,"Falha ao remover o setor, tente novamente.");
                 });
         }
 
@@ -1193,7 +1214,7 @@ projetoIntegrador.controller('setorController', function ($scope, $http, toastr)
                     }
                 },
                     function (response) {
-                        toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o setor, tente novamente.');
+                        $scope.ValidarMsgErro(response,"Falha ao salvar o setor, tente novamente.");
                     });
             }
         }
@@ -1286,7 +1307,7 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                 }
             },
                 function (response) {
-                    toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao remover o usuário, tente novamente.');
+                    $scope.ValidarMsgErro(response,"Falha ao remover o usuário, tente novamente.");
                 });
         }
 
@@ -1321,7 +1342,7 @@ projetoIntegrador.controller('usuarioController', function ($scope, $http, toast
                     }
                 },
                     function (response) {
-                        toastr.error(data.Mensagem.length > 0 ? data.Mensagem : 'Falha ao salvar o usuário, tente novamente.');
+                        $scope.ValidarMsgErro(response,"Falha ao salvar o usuário, tente novamente.");
                     });
             }
         }
